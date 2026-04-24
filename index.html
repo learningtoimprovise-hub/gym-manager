@@ -3,321 +3,1169 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>The Fitness Planet GYM</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>The Fitness Planet GYM — 3D Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS — DARK ATHLETIC THEME
+═══════════════════════════════════════════════════════════ */
 :root {
-  --white: #ffffff;
-  --black: #080808;
-  --accent: #E8330A;
-  --accent2: #FF6B35;
-  --gray-50:  #fafafa;
-  --gray-100: #f4f4f4;
-  --gray-200: #ebebeb;
-  --gray-300: #d4d4d4;
-  --gray-500: #888;
-  --gray-700: #444;
-  --success:  #16a34a;
-  --warning:  #d97706;
-  --danger:   #dc2626;
-  --info:     #2563eb;
+  --black:    #0a0a0a;
+  --black2:   #111111;
+  --black3:   #1a1a1a;
+  --black4:   #222222;
+  --blue:     #00d4ff;
+  --blue2:    #0090cc;
+  --blue3:    #003d66;
+  --neon:     #39ff14;
+  --neon2:    #2acc10;
+  --accent:   #E8330A;
+  --accent2:  #FF6B35;
+  --gold:     #ffd700;
+  --silver:   #c0c0c0;
+  --steel:    #4a5568;
+  --steel2:   #718096;
+
+  --glass-bg:     rgba(255,255,255,0.04);
+  --glass-bg2:    rgba(255,255,255,0.08);
+  --glass-border: rgba(255,255,255,0.10);
+  --glass-border2:rgba(0,212,255,0.20);
+
+  --success:  #22c55e;
+  --warning:  #f59e0b;
+  --danger:   #ef4444;
+  --info:     #00d4ff;
+
   --radius:   18px;
   --radius-sm:10px;
-  --shadow:   0 2px 16px rgba(0,0,0,0.07);
-  --shadow-lg:0 8px 40px rgba(0,0,0,0.13);
-  --insta1: #f09433; --insta2: #e6683c; --insta3: #dc2743; --insta4: #cc2366; --insta5: #bc1888;
+  --radius-lg:24px;
+
+  --shadow-glow-blue: 0 0 20px rgba(0,212,255,0.3), 0 0 40px rgba(0,212,255,0.1);
+  --shadow-glow-neon: 0 0 20px rgba(57,255,20,0.3), 0 0 40px rgba(57,255,20,0.1);
+  --shadow-glow-red:  0 0 20px rgba(232,51,10,0.4), 0 0 40px rgba(232,51,10,0.15);
+  --shadow-glass:     0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
 }
+
+/* ─── RESET & BASE ──────────────────────────── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
-body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);min-height:100vh;overflow-x:hidden;max-width:480px;margin:0 auto;position:relative;}
+body{
+  font-family:'Outfit',sans-serif;
+  background: var(--black);
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
+  max-width:480px;
+  margin:0 auto;
+  position:relative;
+}
 
-/* ─── VIEWS ──────────────────────────────── */
-.view{display:none;min-height:100vh;animation:vFade .32s ease;}
-.view.active{display:block;}
-@keyframes vFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* ─── NOISE TEXTURE OVERLAY ─────────────────── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity:0.025;
+  pointer-events:none;
+  z-index:0;
+}
 
-/* ─── TYPOGRAPHY ─────────────────────────── */
-.bebas{font-family:'Bebas Neue',sans-serif;letter-spacing:1.5px;}
+/* ─── PARTICLE CANVAS ───────────────────────── */
+#particle-canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:1;
+  max-width:480px;left:50%;transform:translateX(-50%);
+}
 
-/* ─── BUTTONS ────────────────────────────── */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:var(--radius);font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;cursor:pointer;border:none;outline:none;transition:all .22s ease;text-decoration:none;}
-.btn-primary{background:var(--accent);color:#fff;}
-.btn-primary:active{background:#c0290a;transform:scale(.97);}
-.btn-black{background:var(--black);color:#fff;}
-.btn-black:active{background:#333;transform:scale(.97);}
-.btn-outline{background:transparent;color:var(--black);border:2px solid var(--black);}
-.btn-outline:active{background:var(--gray-100);}
-.btn-ghost{background:var(--gray-100);color:var(--gray-700);}
-.btn-success{background:var(--success);color:#fff;}
+/* ─── VIEWS ─────────────────────────────────── */
+.view{display:none;min-height:100vh;position:relative;z-index:2;}
+.view.active{display:block;animation:vFade .45s cubic-bezier(.34,1.3,.64,1);}
+@keyframes vFade{
+  from{opacity:0;transform:translateY(20px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* ─── TYPOGRAPHY ─────────────────────────────── */
+.bebas{font-family:'Bebas Neue',sans-serif;letter-spacing:2px;}
+.rajdhani{font-family:'Rajdhani',sans-serif;}
+
+/* ─── GLASSMORPHISM CARD ─────────────────────── */
+.glass-card{
+  background:var(--glass-bg);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-glass);
+  transition:all .35s cubic-bezier(.34,1.3,.64,1);
+}
+.glass-card:hover{
+  background:var(--glass-bg2);
+  border-color:rgba(0,212,255,0.25);
+  box-shadow:0 12px 48px rgba(0,0,0,0.5), var(--shadow-glow-blue), inset 0 1px 0 rgba(255,255,255,0.12);
+  transform:translateY(-3px);
+}
+
+/* ─── METALLIC BUTTONS ───────────────────────── */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:15px 24px;border-radius:var(--radius);
+  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;letter-spacing:.5px;
+  cursor:pointer;border:none;outline:none;
+  transition:all .25s cubic-bezier(.34,1.56,.64,1);
+  text-decoration:none;position:relative;overflow:hidden;
+}
+/* Metallic sheen on all btns */
+.btn::before{
+  content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  transition:left .4s;
+}
+.btn:hover::before{left:150%;}
+.btn::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(255,255,255,0);transition:background .15s;
+}
+.btn:active::after{background:rgba(255,255,255,0.1);}
+.btn:active{transform:scale(.96) translateY(1px);}
+
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;
+  box-shadow:0 6px 24px rgba(232,51,10,.5), 0 1px 0 rgba(255,255,255,.1) inset;
+}
+.btn-primary:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 36px rgba(232,51,10,.6), var(--shadow-glow-red);
+}
+
+.btn-blue{
+  background:linear-gradient(135deg,var(--blue2),var(--blue));
+  color:var(--black);font-weight:800;
+  box-shadow:0 6px 24px rgba(0,212,255,.4), 0 1px 0 rgba(255,255,255,.3) inset;
+}
+.btn-blue:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 36px rgba(0,212,255,.5), var(--shadow-glow-blue);
+}
+
+.btn-neon{
+  background:linear-gradient(135deg,#1a4a1a,var(--neon2));
+  color:var(--black);font-weight:800;
+  box-shadow:0 6px 24px rgba(57,255,20,.35), 0 1px 0 rgba(255,255,255,.2) inset;
+  border:1px solid var(--neon);
+}
+.btn-neon:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 36px rgba(57,255,20,.5), var(--shadow-glow-neon);
+}
+
+.btn-steel{
+  background:linear-gradient(160deg,var(--black3),var(--black4),#2d3748);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 6px 24px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.08) inset;
+}
+.btn-steel:hover{
+  transform:translateY(-3px);
+  border-color:rgba(0,212,255,0.4);
+  box-shadow:0 12px 36px rgba(0,0,0,.7), 0 0 15px rgba(0,212,255,0.2);
+}
+
+.btn-ghost{
+  background:var(--glass-bg);
+  color:rgba(255,255,255,.6);
+  border:1px solid var(--glass-border);
+}
+.btn-ghost:hover{background:var(--glass-bg2);color:#fff;}
+
+.btn-success{
+  background:linear-gradient(135deg,#15803d,var(--success));
+  color:#fff;
+  box-shadow:0 6px 20px rgba(34,197,94,.4);
+}
+.btn-success:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(34,197,94,.5);}
+
 .btn-full{width:100%;}
-.btn-sm{padding:9px 16px;font-size:13px;border-radius:10px;}
+.btn-sm{padding:9px 16px;font-size:14px;border-radius:10px;}
 .btn-icon{width:42px;height:42px;border-radius:50%;padding:0;}
 
-/* ─── INPUTS ─────────────────────────────── */
+/* ─── INPUTS ─────────────────────────────────── */
 .input-group{margin-bottom:14px;}
-.input-group label{display:block;font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:6px;}
-.input-group input, .input-group select, .input-group textarea{
-  width:100%;padding:13px 16px;border:1.5px solid var(--gray-300);border-radius:var(--radius-sm);
-  font-family:'Outfit',sans-serif;font-size:15px;background:var(--gray-50);color:var(--black);
-  transition:border .2s;outline:none;
+.input-group label{
+  display:block;font-size:12px;font-weight:700;
+  color:rgba(255,255,255,.5);margin-bottom:6px;
+  letter-spacing:.8px;text-transform:uppercase;
 }
-.input-group input:focus,.input-group select:focus{border-color:var(--accent);background:#fff;}
+.input-group input,
+.input-group select,
+.input-group textarea{
+  width:100%;padding:13px 16px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--radius-sm);
+  font-family:'Outfit',sans-serif;font-size:15px;
+  background:rgba(255,255,255,.05);
+  color:#fff;
+  transition:all .25s;outline:none;
+  backdrop-filter:blur(10px);
+}
+.input-group select option{background:var(--black3);color:#fff;}
+.input-group input::placeholder{color:rgba(255,255,255,.25);}
+.input-group input:focus,.input-group select:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(0,212,255,.15), 0 0 20px rgba(0,212,255,.1);
+  background:rgba(0,212,255,.05);
+  transform:translateY(-1px);
+}
 .input-group.icon-left{position:relative;}
 .input-group.icon-left input{padding-left:42px;}
-.input-group.icon-left .inp-icon{position:absolute;left:14px;bottom:14px;color:var(--gray-500);font-size:15px;}
+.input-group.icon-left .inp-icon{position:absolute;left:14px;bottom:14px;color:rgba(255,255,255,.3);font-size:15px;}
 
-/* ─── CARDS ──────────────────────────────── */
-.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--gray-200);}
-.card-p{padding:20px;}
+/* ─── STAT CARDS (3D with tilt) ──────────────── */
+.stat-card{
+  border-radius:var(--radius);
+  padding:20px 18px;
+  display:flex;flex-direction:column;gap:4px;
+  cursor:default;position:relative;overflow:hidden;
+  transform-style:preserve-3d;
+  transition:all .3s cubic-bezier(.34,1.3,.64,1);
+  will-change:transform;
+}
+.stat-card::before{
+  content:'';position:absolute;top:-20px;right:-20px;
+  width:80px;height:80px;border-radius:50%;
+  background:rgba(255,255,255,0.06);
+}
+.stat-card::after{
+  content:'';position:absolute;bottom:-30px;left:-10px;
+  width:100px;height:100px;border-radius:50%;
+  background:rgba(255,255,255,0.03);
+}
+/* Metallic shine on stat cards */
+.stat-card .card-shine{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 50%,rgba(255,255,255,.03) 100%);
+  pointer-events:none;border-radius:inherit;
+}
+.stat-card .stat-val{
+  font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;
+}
+.stat-card .stat-lbl{
+  font-size:11px;font-weight:700;letter-spacing:1px;opacity:.6;
+  font-family:'Rajdhani',sans-serif;
+}
+.stat-card .stat-icon{font-size:22px;margin-bottom:6px;}
+.stat-card .stat-delta{
+  font-size:10px;font-weight:600;margin-top:2px;
+  opacity:.7;
+}
 
-/* ─── STAT CARD ──────────────────────────── */
-.stat-card{border-radius:var(--radius);padding:18px 16px;display:flex;flex-direction:column;gap:4px;}
-.stat-card .stat-val{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;}
-.stat-card .stat-lbl{font-size:12px;font-weight:600;letter-spacing:.5px;opacity:.75;}
-.stat-card .stat-icon{font-size:22px;margin-bottom:4px;}
-.sc-red{background:var(--accent);color:#fff;}
-.sc-black{background:var(--black);color:#fff;}
-.sc-green{background:#dcfce7;color:var(--success);}
-.sc-orange{background:#fff7ed;color:var(--warning);}
+.sc-blue{
+  background:linear-gradient(135deg,#003d66,#005a8e,#0077be);
+  border:1px solid rgba(0,212,255,.25);
+  box-shadow:0 8px 32px rgba(0,0,0,.4), var(--shadow-glow-blue);
+}
+.sc-red{
+  background:linear-gradient(135deg,#5a1006,#8a1e0a,var(--accent));
+  border:1px solid rgba(232,51,10,.3);
+  box-shadow:0 8px 32px rgba(0,0,0,.4), var(--shadow-glow-red);
+}
+.sc-neon{
+  background:linear-gradient(135deg,#0a1f0a,#1a3d1a,#1f5c1f);
+  border:1px solid rgba(57,255,20,.2);
+  box-shadow:0 8px 32px rgba(0,0,0,.4), var(--shadow-glow-neon);
+  color:var(--neon);
+}
+.sc-gold{
+  background:linear-gradient(135deg,#3d2e00,#6b4f00,#997200);
+  border:1px solid rgba(255,215,0,.25);
+  box-shadow:0 8px 32px rgba(0,0,0,.4), 0 0 20px rgba(255,215,0,.15);
+  color:var(--gold);
+}
 
-/* ─── BADGE ──────────────────────────────── */
-.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px;}
-.badge-success{background:#dcfce7;color:var(--success);}
-.badge-danger{background:#fee2e2;color:var(--danger);}
-.badge-warning{background:#fef3c7;color:var(--warning);}
-.badge-info{background:#dbeafe;color:var(--info);}
+/* ─── BADGE ──────────────────────────────────── */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  font-size:11px;font-weight:700;letter-spacing:.3px;
+}
+.badge-success{background:rgba(34,197,94,.15);color:var(--success);border:1px solid rgba(34,197,94,.3);}
+.badge-danger{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+.badge-warning{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.3);}
+.badge-info{background:rgba(0,212,255,.12);color:var(--blue);border:1px solid rgba(0,212,255,.25);}
+.badge-pulse{animation:badgePulse 1.8s ease-in-out infinite;}
+@keyframes badgePulse{
+  0%,100%{box-shadow:0 0 0 0 currentColor;}
+  50%{box-shadow:0 0 0 5px transparent;}
+}
 
-/* ─── TOP BAR ────────────────────────────── */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);z-index:100;border-bottom:1px solid var(--gray-200);}
-.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
-.topbar-back{background:none;border:none;cursor:pointer;font-size:20px;color:var(--black);padding:4px;}
+/* ─── TOP BAR ────────────────────────────────── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px 14px;position:sticky;top:0;
+  background:rgba(10,10,10,.85);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  z-index:100;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  box-shadow:0 4px 24px rgba(0,0,0,.4);
+}
+.topbar-title{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;
+  letter-spacing:2px;
+  background:linear-gradient(135deg,#fff,rgba(255,255,255,.7));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.topbar-back{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);
+  cursor:pointer;font-size:16px;color:#fff;padding:0;
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .25s;
+}
+.topbar-back:hover{
+  background:rgba(0,212,255,.15);
+  border-color:rgba(0,212,255,.4);
+  transform:scale(1.1);
+  box-shadow:0 0 15px rgba(0,212,255,.2);
+}
 
-/* ─── BOTTOM NAV ─────────────────────────── */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--gray-200);display:flex;z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,.06);}
-.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 12px;cursor:pointer;font-size:10px;font-weight:600;color:var(--gray-500);border:none;background:none;transition:color .2s;}
-.bnav-item i{font-size:19px;}
-.bnav-item.active{color:var(--accent);}
+/* ─── BOTTOM NAV ─────────────────────────────── */
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:rgba(10,10,10,.92);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid rgba(255,255,255,.08);
+  display:flex;z-index:200;
+  box-shadow:0 -8px 40px rgba(0,0,0,.5);
+}
+.bnav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 0 14px;cursor:pointer;font-size:10px;font-weight:700;
+  color:rgba(255,255,255,.35);border:none;background:none;
+  transition:all .28s cubic-bezier(.34,1.56,.64,1);
+  font-family:'Rajdhani',sans-serif;letter-spacing:.5px;
+}
+.bnav-item i{font-size:20px;transition:transform .28s cubic-bezier(.34,1.56,.64,1);}
+.bnav-item.active{color:var(--blue);}
+.bnav-item.active i{
+  transform:translateY(-4px) scale(1.2);
+  filter:drop-shadow(0 0 6px var(--blue));
+}
 .bnav-item:active{opacity:.7;}
 
-/* ─── TAB BAR ────────────────────────────── */
-.tab-bar{display:flex;gap:4px;background:var(--gray-100);padding:4px;border-radius:12px;margin:0 20px 20px;}
-.tab-item{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;transition:all .2s;color:var(--gray-500);}
-.tab-item.active{background:#fff;color:var(--black);box-shadow:var(--shadow);}
+/* ─── TAB BAR ────────────────────────────────── */
+.tab-bar{
+  display:flex;gap:4px;
+  background:rgba(255,255,255,.04);
+  padding:4px;border-radius:14px;margin:0 20px 20px;
+  border:1px solid rgba(255,255,255,.07);
+}
+.tab-item{
+  flex:1;padding:10px;text-align:center;font-size:13px;font-weight:700;
+  border-radius:11px;cursor:pointer;transition:all .28s cubic-bezier(.34,1.56,.64,1);
+  color:rgba(255,255,255,.35);font-family:'Rajdhani',sans-serif;letter-spacing:.5px;
+}
+.tab-item.active{
+  background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(0,144,204,.1));
+  color:var(--blue);
+  box-shadow:0 4px 16px rgba(0,0,0,.3), 0 0 15px rgba(0,212,255,.1);
+  border:1px solid rgba(0,212,255,.2);
+  transform:translateY(-1px);
+}
 
-/* ─── PAYMENT ROW ────────────────────────── */
-.pay-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-100);}
+/* ─── PAYMENT ROW ────────────────────────────── */
+.pay-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 4px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  cursor:pointer;transition:all .22s;border-radius:8px;
+}
+.pay-row:hover{background:rgba(0,212,255,.05);padding:14px 10px;margin:0 -6px;}
 .pay-row:last-child{border-bottom:none;}
 .pay-row-left{flex:1;}
-.pay-row-name{font-weight:700;font-size:14px;}
-.pay-row-date{font-size:11px;color:var(--gray-500);margin-top:2px;}
-.pay-row-amount{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.5px;}
+.pay-row-name{font-weight:700;font-size:14px;color:#fff;}
+.pay-row-date{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;}
+.pay-row-amount{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;
+}
 
-/* ─── MEMBER ROW ─────────────────────────── */
-.member-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--gray-100);}
+/* ─── MEMBER ROW ─────────────────────────────── */
+.member-row{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 4px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  transition:all .22s;
+}
+.member-row:hover{
+  background:rgba(0,212,255,.05);
+  padding:14px 10px;margin:0 -6px;border-radius:10px;
+}
 .member-row:last-child{border-bottom:none;}
-.member-avatar{width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;flex-shrink:0;}
+.member-avatar{
+  width:46px;height:46px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;
+  flex-shrink:0;
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
+}
+.member-avatar::after{
+  content:'';position:absolute;inset:-2px;border-radius:50%;
+  border:2px solid rgba(0,212,255,.3);
+  opacity:0;transition:opacity .25s;
+}
+.member-row:hover .member-avatar{transform:scale(1.1);}
+.member-row:hover .member-avatar::after{opacity:1;}
 .member-info{flex:1;}
-.member-name{font-weight:700;font-size:14px;}
-.member-phone{font-size:12px;color:var(--gray-500);}
-.member-action{font-size:18px;color:var(--gray-300);}
+.member-name{font-weight:700;font-size:14px;color:#fff;}
+.member-phone{font-size:12px;color:rgba(255,255,255,.4);}
 
-/* ─── MODAL ──────────────────────────────── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);}
+/* ─── MODAL ──────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.7);z-index:500;
+  align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
 .modal-overlay.open{display:flex;animation:mFade .25s ease;}
 @keyframes mFade{from{opacity:0}to{opacity:1}}
-.modal-sheet{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding:28px 20px 40px;animation:mSlide .3s ease;}
-@keyframes mSlide{from{transform:translateY(60px)}to{transform:translateY(0)}}
-.modal-handle{width:40px;height:4px;background:var(--gray-300);border-radius:4px;margin:0 auto 22px;}
-.modal-title{font-family:'Bebas Neue',sans-serif;font-size:26px;margin-bottom:18px;}
+.modal-sheet{
+  background:linear-gradient(180deg,var(--black3),var(--black2));
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:28px 28px 0 0;
+  width:100%;max-width:480px;max-height:92vh;
+  overflow-y:auto;padding:28px 20px 44px;
+  animation:mSlide .38s cubic-bezier(.34,1.3,.64,1);
+  box-shadow:0 -20px 60px rgba(0,0,0,.6), 0 -1px 0 rgba(0,212,255,.15);
+}
+@keyframes mSlide{from{transform:translateY(80px)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:4px;margin:0 auto 22px;}
+.modal-title{
+  font-family:'Bebas Neue',sans-serif;font-size:28px;margin-bottom:18px;
+  background:linear-gradient(90deg,#fff,rgba(255,255,255,.6));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:2px;
+}
 
-/* ─── TOAST ──────────────────────────────── */
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--black);color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;z-index:1000;white-space:nowrap;pointer-events:none;}
+/* ─── TOAST ──────────────────────────────────── */
+#toast{
+  position:fixed;bottom:90px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--black3);color:#fff;
+  padding:13px 24px;border-radius:30px;
+  font-size:14px;font-weight:600;
+  opacity:0;transition:all .38s cubic-bezier(.34,1.56,.64,1);
+  z-index:1000;white-space:nowrap;pointer-events:none;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  font-family:'Rajdhani',sans-serif;letter-spacing:.3px;
+}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-#toast.success{background:var(--success);}
-#toast.error{background:var(--danger);}
+#toast.success{
+  background:linear-gradient(135deg,#15803d,var(--success));
+  border-color:rgba(34,197,94,.4);
+  box-shadow:0 8px 32px rgba(0,0,0,.5), var(--shadow-glow-neon);
+}
+#toast.error{
+  background:linear-gradient(135deg,#991b1b,var(--danger));
+  border-color:rgba(239,68,68,.4);
+}
 
-/* ─── INVOICE ────────────────────────────── */
-.invoice-box{background:#fff;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:22px;font-size:13px;}
-.invoice-header{text-align:center;margin-bottom:18px;padding-bottom:18px;border-bottom:2px dashed var(--gray-200);}
-.invoice-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--accent);}
-.invoice-sub{font-size:11px;color:var(--gray-500);margin-top:2px;}
-.invoice-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--gray-100);}
+/* ─── INVOICE ────────────────────────────────── */
+.invoice-box{
+  background:var(--black3);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);padding:24px;font-size:13px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.invoice-header{text-align:center;margin-bottom:18px;padding-bottom:18px;border-bottom:1px dashed rgba(255,255,255,.1);}
+.invoice-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.invoice-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;}
+.invoice-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);
+}
 .invoice-row:last-child{border:none;}
-.invoice-row .lbl{color:var(--gray-500);font-size:12px;}
-.invoice-row .val{font-weight:700;font-size:13px;text-align:right;}
-.invoice-total{background:var(--accent);color:#fff;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
-.invoice-total .lbl{font-weight:700;}
-.invoice-total .val{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;}
+.invoice-row .lbl{color:rgba(255,255,255,.4);font-size:12px;}
+.invoice-row .val{font-weight:700;font-size:13px;text-align:right;color:#fff;}
+.invoice-total{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:12px;padding:16px;
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:14px;
+  box-shadow:0 8px 24px rgba(232,51,10,.4);
+}
+.invoice-total .lbl{font-weight:700;color:#fff;}
+.invoice-total .val{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:#fff;}
 
-/* ─────────────────────────────────────────── */
-/*  VIEW: LANDING                              */
-/* ─────────────────────────────────────────── */
-#v-landing{background:var(--white);display:flex;flex-direction:column;min-height:100vh;}
-.landing-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px 20px;text-align:center;position:relative;overflow:hidden;}
-.landing-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;background:var(--accent);opacity:.05;border-radius:50%;}
-.landing-hero::after{content:'';position:absolute;bottom:-60px;left:-60px;width:220px;height:220px;background:var(--black);opacity:.04;border-radius:50%;}
-.landing-dumbbell{margin-bottom:14px;animation:float 3s ease-in-out infinite;display:inline-block;filter:drop-shadow(0 8px 20px rgba(232,51,10,.25));}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.landing-tagline{font-size:14px;color:var(--gray-500);font-weight:500;margin-top:8px;letter-spacing:.5px;}
-.landing-accent-bar{width:60px;height:4px;background:var(--accent);border-radius:4px;margin:18px auto;}
-.landing-ctas{width:100%;display:flex;flex-direction:column;gap:12px;padding:0 28px 24px;}
-.landing-cta-hint{font-size:12px;color:var(--gray-500);text-align:center;margin-top:4px;}
+/* ─── EMPTY STATE ────────────────────────────── */
+.empty-state{text-align:center;padding:50px 20px;color:rgba(255,255,255,.3);}
+.empty-state i{font-size:48px;opacity:.2;margin-bottom:14px;display:block;}
+.empty-state p{font-size:14px;}
 
-/* ── SOCIAL STRIP ───────────────────────── */
-.social-strip{padding:20px 24px 34px;background:var(--gray-50);border-top:1px solid var(--gray-200);}
-.social-strip-label{font-size:11px;font-weight:800;color:var(--gray-500);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:16px;}
-.social-icons-row{display:flex;gap:16px;justify-content:center;}
+/* ─── SEARCH BAR ─────────────────────────────── */
+.search-bar{position:relative;margin:0 20px 16px;}
+.search-bar input{
+  width:100%;padding:12px 16px 12px 44px;
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  font-family:'Outfit',sans-serif;font-size:14px;
+  background:rgba(255,255,255,.04);color:#fff;outline:none;
+  transition:all .25s;
+}
+.search-bar input::placeholder{color:rgba(255,255,255,.25);}
+.search-bar input:focus{
+  border-color:rgba(0,212,255,.4);
+  box-shadow:0 0 0 3px rgba(0,212,255,.1);
+  background:rgba(0,212,255,.04);
+}
+.search-bar i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);font-size:15px;}
+
+/* ─── FAB ────────────────────────────────────── */
+.fab{
+  position:fixed;bottom:90px;right:20px;
+  width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue2),var(--blue));
+  color:var(--black);border:none;font-size:24px;cursor:pointer;
+  box-shadow:0 8px 32px rgba(0,212,255,.5), var(--shadow-glow-blue);
+  display:flex;align-items:center;justify-content:center;z-index:150;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  font-weight:900;
+}
+.fab:hover{
+  transform:scale(1.15) rotate(90deg);
+  box-shadow:0 14px 48px rgba(0,212,255,.6), var(--shadow-glow-blue);
+}
+.fab:active{transform:scale(.93);}
+
+/* ─── DIVIDER ────────────────────────────────── */
+.divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:16px 0;}
+
+/* ─── CHIP ───────────────────────────────────── */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 14px;border-radius:20px;
+  font-size:12px;font-weight:700;
+  background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);
+  cursor:pointer;border:1px solid rgba(255,255,255,.08);
+  transition:all .22s;white-space:nowrap;
+  font-family:'Rajdhani',sans-serif;letter-spacing:.3px;
+}
+.chip.active{
+  background:rgba(0,212,255,.15);
+  color:var(--blue);
+  border-color:rgba(0,212,255,.35);
+  box-shadow:0 0 12px rgba(0,212,255,.15);
+}
+
+/* ─── SPINNER (Dumbbell) ─────────────────────── */
+.dumbbell-spinner{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;
+  animation:dumbbellSpin 1s linear infinite;
+}
+@keyframes dumbbellSpin{to{transform:rotate(360deg)}}
+
+/* Avatar colors */
+.av0{background:linear-gradient(135deg,var(--accent),var(--accent2));}
+.av1{background:linear-gradient(135deg,#7c3aed,#a855f7);}
+.av2{background:linear-gradient(135deg,var(--blue2),var(--blue));}
+.av3{background:linear-gradient(135deg,#15803d,var(--success));}
+.av4{background:linear-gradient(135deg,#b45309,var(--gold));}
+.av5{background:linear-gradient(135deg,#be185d,#ec4899);}
+
+/* Delete btn */
+.del-btn{
+  background:none;border:none;color:rgba(239,68,68,.6);
+  cursor:pointer;font-size:15px;padding:6px;
+  transition:all .2s;
+}
+.del-btn:hover{color:var(--danger);transform:scale(1.25);filter:drop-shadow(0 0 6px var(--danger));}
+
+/* ─── Quick Action Cards ─────────────────────── */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 20px;}
+.qa-card{
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:20px 16px;
+  cursor:pointer;transition:all .35s cubic-bezier(.34,1.3,.64,1);
+  display:flex;flex-direction:column;gap:10px;
+  position:relative;overflow:hidden;
+  backdrop-filter:blur(12px);
+}
+.qa-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--blue),var(--neon));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .35s cubic-bezier(.34,1.3,.64,1);
+}
+.qa-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(0,212,255,.06),transparent 60%);
+  opacity:0;transition:opacity .35s;
+}
+.qa-card:hover::before{transform:scaleX(1);}
+.qa-card:hover::after{opacity:1;}
+.qa-card:hover{
+  background:rgba(0,212,255,.06);
+  border-color:rgba(0,212,255,.25);
+  transform:translateY(-5px) scale(1.02);
+  box-shadow:0 16px 40px rgba(0,0,0,.4), 0 0 20px rgba(0,212,255,.1);
+}
+.qa-card:active{transform:scale(.97);}
+.qa-card i{font-size:26px;color:var(--blue);position:relative;z-index:1;}
+.qa-card span{font-weight:700;font-size:14px;color:#fff;position:relative;z-index:1;font-family:'Rajdhani',sans-serif;letter-spacing:.3px;}
+
+/* ─── Pending notice ─────────────────────────── */
+.pending-notice{
+  background:rgba(245,158,11,.08);
+  border:1px solid rgba(245,158,11,.25);border-radius:var(--radius);
+  padding:14px 16px;margin:0 20px 20px;
+  display:flex;align-items:center;gap:12px;
+  animation:wiggle 0.6s ease 1s both;
+  box-shadow:0 4px 20px rgba(245,158,11,.1), 0 0 30px rgba(245,158,11,.05);
+}
+@keyframes wiggle{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-5px);}
+  40%{transform:translateX(5px);}
+  60%{transform:translateX(-3px);}
+  80%{transform:translateX(3px);}
+}
+.pending-notice i{font-size:22px;color:var(--warning);flex-shrink:0;}
+.pending-notice .pn-text{font-size:13px;line-height:1.5;color:rgba(255,255,255,.7);}
+.pending-notice .pn-amount{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--warning);}
+
+/* ─── STAGGER ANIMATIONS ─────────────────────── */
+.stagger-child{
+  opacity:0;
+  animation:staggerIn .45s cubic-bezier(.34,1.3,.64,1) forwards;
+}
+@keyframes staggerIn{
+  from{opacity:0;transform:translateY(24px) scale(.95);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+
+/* ─── CONFETTI ───────────────────────────────── */
+.confetti-piece{
+  position:fixed;pointer-events:none;z-index:9999;
+  animation:confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1);}
+  100%{opacity:0;transform:translateY(100vh) rotate(720deg) scale(0.3);}
+}
+
+/* ─── FLOAT SCORE ────────────────────────────── */
+.float-score{
+  position:fixed;font-family:'Bebas Neue',sans-serif;
+  font-size:30px;color:var(--neon);
+  pointer-events:none;z-index:9999;
+  animation:scoreFloat 1.6s cubic-bezier(.34,1.56,.64,1) forwards;
+  text-shadow:0 0 20px var(--neon), 0 4px 12px rgba(0,0,0,.5);
+  letter-spacing:1px;
+}
+@keyframes scoreFloat{
+  0%{opacity:1;transform:translateY(0) scale(.8);}
+  25%{opacity:1;transform:translateY(-20px) scale(1.15);}
+  100%{opacity:0;transform:translateY(-120px) scale(.8);}
+}
+
+/* ─── PULSE DOT ──────────────────────────────── */
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:.4;transform:scale(1.5);}
+}
+
+/* ─── COUNTER ANIMATION ──────────────────────── */
+.count-up{display:inline;}
+
+/* ─── SCROLLBAR ──────────────────────────────── */
+::-webkit-scrollbar{width:0;}
+
+/* ─── SECTION HEADERS ────────────────────────── */
+.dash-section{padding:20px 20px 0;}
+.dash-section-title{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;
+  margin-bottom:14px;
+  display:flex;align-items:center;justify-content:space-between;
+  letter-spacing:1.5px;
+  background:linear-gradient(90deg,#fff,rgba(255,255,255,.5));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+
+/* ─── PREFERS REDUCED MOTION ─────────────────── */
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+}
+
+/* ════════════════════════════════════════════════
+   VIEW: LANDING
+════════════════════════════════════════════════ */
+#v-landing{
+  background:var(--black);
+  display:flex;flex-direction:column;min-height:100vh;
+}
+
+.landing-hero{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:50px 28px 24px;text-align:center;
+  position:relative;overflow:hidden;
+}
+
+/* Grid background pattern */
+.landing-hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  -webkit-mask:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+  mask:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+}
+/* Glow orb */
+.landing-hero::after{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(232,51,10,.12),transparent 65%);
+  border-radius:50%;
+  animation:heroGlow 4s ease-in-out infinite;
+}
+@keyframes heroGlow{
+  0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1);}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}
+}
+
+/* 3D DUMBBELL */
+.landing-dumbbell{
+  margin-bottom:20px;
+  animation:float3d 3.5s ease-in-out infinite;
+  display:inline-block;
+  position:relative;z-index:1;
+}
+@keyframes float3d{
+  0%,100%{transform:translateY(0) rotateY(0deg) rotateX(0deg);}
+  25%{transform:translateY(-12px) rotateY(10deg) rotateX(3deg);}
+  75%{transform:translateY(-8px) rotateY(-10deg) rotateX(-3deg);}
+}
+
+.landing-gym-name{
+  font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;line-height:1.1;
+  position:relative;z-index:1;
+}
+.landing-gym-name span{
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.landing-tagline{
+  font-size:13px;color:rgba(255,255,255,.4);font-weight:500;
+  margin-top:10px;letter-spacing:2px;text-transform:uppercase;
+  position:relative;z-index:1;
+}
+.landing-accent-bar{
+  width:60px;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--blue));
+  border-radius:4px;margin:20px auto;
+  animation:barPulse 2.5s ease-in-out infinite;
+  position:relative;z-index:1;
+}
+@keyframes barPulse{
+  0%,100%{width:60px;box-shadow:0 0 8px rgba(0,212,255,.3);}
+  50%{width:120px;box-shadow:0 0 20px rgba(0,212,255,.6), 0 0 40px rgba(232,51,10,.3);}
+}
+.landing-ctas{width:100%;display:flex;flex-direction:column;gap:12px;padding:0 28px 28px;}
+.landing-cta-hint{
+  font-size:12px;color:rgba(255,255,255,.3);
+  text-align:center;margin-top:4px;
+  font-family:'Rajdhani',sans-serif;letter-spacing:.3px;
+}
+.landing-cta-hint b{color:rgba(0,212,255,.7);}
+
+/* Social strip */
+.social-strip{
+  padding:20px 24px 36px;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.4));
+  border-top:1px solid rgba(255,255,255,.05);
+}
+.social-strip-label{
+  font-size:10px;font-weight:800;color:rgba(255,255,255,.3);
+  letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:18px;
+  font-family:'Rajdhani',sans-serif;
+}
+.social-icons-row{display:flex;gap:20px;justify-content:center;}
 .soc-wrap{display:flex;flex-direction:column;align-items:center;gap:7px;}
-.soc-name{font-size:10px;font-weight:700;color:var(--gray-500);letter-spacing:.5px;}
-
-/* Button base */
+.soc-name{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.5px;}
 .social-btn{
   width:64px;height:64px;border-radius:20px;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;text-decoration:none;
   position:relative;overflow:hidden;
-  box-shadow:0 6px 24px rgba(0,0,0,.15);
-  transition:transform .25s ease, box-shadow .25s ease;
+  box-shadow:0 6px 24px rgba(0,0,0,.4);
+  transition:transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .28s;
 }
-.social-btn:hover{transform:scale(1.08);box-shadow:0 10px 32px rgba(0,0,0,.22);}
+.social-btn:hover{transform:scale(1.12) translateY(-4px);}
 .social-btn:active{transform:scale(.95);}
-
-/* Icon sits on top (z-index:3) */
-.social-btn svg.soc-icon{
-  width:30px;height:30px;fill:white;
-  position:relative;z-index:3;
-  pointer-events:none;
-}
-
-/* Two background halves via ::before / ::after (z-index:1,2) */
-.social-btn::before,.social-btn::after{
-  content:'';position:absolute;left:0;width:100%;height:50%;z-index:1;
-}
+.social-btn svg.soc-icon{width:30px;height:30px;fill:white;position:relative;z-index:3;pointer-events:none;}
+.social-btn::before,.social-btn::after{content:'';position:absolute;left:0;width:100%;height:50%;z-index:1;}
 .social-btn::before{top:0;}
 .social-btn::after{bottom:0;}
-
-/* Instagram gradient halves */
 .insta::before{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743);}
-.insta::after {background:linear-gradient(135deg,#dc2743,#cc2366,#bc1888);}
-/* Insta full glow */
-.insta{box-shadow:0 6px 24px rgba(188,24,136,.35);}
-
-/* Facebook halves */
+.insta::after{background:linear-gradient(135deg,#dc2743,#cc2366,#bc1888);}
+.insta{box-shadow:0 6px 24px rgba(188,24,136,.4);}
 .fb::before,.fb::after{background:#1877f2;}
-.fb{box-shadow:0 6px 24px rgba(24,119,242,.35);}
+.fb{box-shadow:0 6px 24px rgba(24,119,242,.4);}
+.social-btn.split-animate::before{animation:splitBgTop .55s cubic-bezier(.34,1.56,.64,1) forwards;}
+.social-btn.split-animate::after{animation:splitBgBot .55s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes splitBgTop{0%{transform:translateY(0);}35%{transform:translateY(-18px);}100%{transform:translateY(0);}}
+@keyframes splitBgBot{0%{transform:translateY(0);}35%{transform:translateY(18px);}100%{transform:translateY(0);}}
 
-/* ── SPLIT ANIMATION (pseudo elements move, icon stays) ── */
-.social-btn.split-animate::before{animation:splitBgTop .58s cubic-bezier(.34,1.56,.64,1) forwards;}
-.social-btn.split-animate::after {animation:splitBgBot .58s cubic-bezier(.34,1.56,.64,1) forwards;}
-.social-btn:hover::before{animation:splitBgTop .45s cubic-bezier(.34,1.56,.64,1) forwards;}
-.social-btn:hover::after {animation:splitBgBot .45s cubic-bezier(.34,1.56,.64,1) forwards;}
-
-@keyframes splitBgTop{
-  0%  {transform:translateY(0);}
-  35% {transform:translateY(-16px);}
-  100%{transform:translateY(0);}
-}
-@keyframes splitBgBot{
-  0%  {transform:translateY(0);}
-  35% {transform:translateY(16px);}
-  100%{transform:translateY(0);}
-}
-
-/* ─── VIEW: AUTH ─────────────────────────── */
+/* ════════════════════════════════════════════════
+   VIEW: AUTH
+════════════════════════════════════════════════ */
 #v-auth{padding-bottom:40px;}
-.auth-hero{background:var(--black);padding:50px 28px 36px;position:relative;overflow:hidden;}
-.auth-hero::before{content:'FITNESS';font-family:'Bebas Neue',sans-serif;font-size:80px;position:absolute;right:-10px;top:50%;transform:translateY(-50%);opacity:.07;color:#fff;letter-spacing:4px;white-space:nowrap;}
-.auth-hero-gym{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:var(--accent);margin-bottom:4px;}
-.auth-hero-title{font-family:'Bebas Neue',sans-serif;font-size:42px;color:#fff;letter-spacing:2px;line-height:1;}
-.auth-hero-back{position:absolute;top:22px;left:20px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.auth-hero{
+  background:linear-gradient(160deg,#050505,var(--black3),#0a1a2e);
+  padding:56px 28px 40px;position:relative;overflow:hidden;
+}
+.auth-hero::before{
+  content:'FITNESS';font-family:'Bebas Neue',sans-serif;
+  font-size:90px;position:absolute;right:-10px;top:50%;
+  transform:translateY(-50%);opacity:.04;color:#fff;
+  letter-spacing:4px;white-space:nowrap;
+}
+.auth-hero::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(circle at 85% 50%,rgba(0,212,255,.08),transparent 55%);
+}
+/* Grid in auth hero */
+.auth-hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);
+  background-size:30px 30px;
+}
+.auth-hero-gym{
+  font-family:'Bebas Neue',sans-serif;font-size:12px;
+  letter-spacing:4px;color:var(--blue);margin-bottom:6px;
+  position:relative;z-index:1;
+}
+.auth-hero-title{
+  font-family:'Bebas Neue',sans-serif;font-size:48px;
+  letter-spacing:3px;line-height:1;
+  position:relative;z-index:1;
+  background:linear-gradient(135deg,#fff,rgba(255,255,255,.7));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.auth-hero-back{
+  position:absolute;top:22px;left:20px;width:38px;height:38px;
+  border-radius:50%;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  color:#fff;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .22s;z-index:2;
+}
+.auth-hero-back:hover{background:rgba(0,212,255,.15);border-color:rgba(0,212,255,.4);transform:scale(1.1);}
 .auth-body{padding:28px 20px 0;}
-.auth-toggle{display:flex;gap:0;background:var(--gray-100);padding:4px;border-radius:12px;margin-bottom:24px;}
-.auth-toggle-btn{flex:1;padding:10px;text-align:center;font-size:14px;font-weight:700;border-radius:9px;cursor:pointer;transition:all .2s;color:var(--gray-500);border:none;background:none;}
-.auth-toggle-btn.active{background:#fff;color:var(--black);box-shadow:var(--shadow);}
+.auth-toggle{
+  display:flex;gap:0;
+  background:rgba(255,255,255,.04);
+  padding:4px;border-radius:12px;margin-bottom:24px;
+  border:1px solid rgba(255,255,255,.07);
+}
+.auth-toggle-btn{
+  flex:1;padding:11px;text-align:center;font-size:14px;font-weight:700;
+  border-radius:9px;cursor:pointer;
+  transition:all .28s cubic-bezier(.34,1.56,.64,1);
+  color:rgba(255,255,255,.35);border:none;background:none;
+  font-family:'Rajdhani',sans-serif;letter-spacing:.5px;
+}
+.auth-toggle-btn.active{
+  background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(0,144,204,.1));
+  color:var(--blue);
+  border:1px solid rgba(0,212,255,.2);
+  box-shadow:0 4px 16px rgba(0,0,0,.3), 0 0 12px rgba(0,212,255,.1);
+  transform:translateY(-1px);
+}
 
-/* ─── VIEW: ADMIN DASH ───────────────────── */
-#v-admin-dash{padding-bottom:80px;}
-.admin-hero{background:var(--black);padding:28px 20px 24px;position:relative;overflow:hidden;}
-.admin-hero::before{content:'ADMIN';font-family:'Bebas Neue',sans-serif;font-size:90px;position:absolute;right:-5px;top:50%;transform:translateY(-50%);opacity:.06;color:#fff;letter-spacing:4px;}
-.admin-hero-greet{font-size:13px;color:rgba(255,255,255,.6);font-weight:500;margin-bottom:2px;}
-.admin-hero-name{font-family:'Bebas Neue',sans-serif;font-size:30px;color:#fff;letter-spacing:1px;}
-.admin-hero-gym{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:1px;margin-top:2px;}
-.dash-section{padding:20px 20px 0;}
-.dash-section-title{font-family:'Bebas Neue',sans-serif;font-size:20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+/* ════════════════════════════════════════════════
+   VIEW: ADMIN DASHBOARD
+════════════════════════════════════════════════ */
+#v-admin-dash{padding-bottom:80px;background:var(--black);}
+.admin-hero{
+  background:linear-gradient(160deg,#050505,var(--black3),#000d1a);
+  padding:28px 20px 24px;position:relative;overflow:hidden;
+}
+.admin-hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);
+  background-size:28px 28px;
+  opacity:.8;
+}
+.admin-hero::before{
+  content:'ADMIN';font-family:'Bebas Neue',sans-serif;
+  font-size:100px;position:absolute;right:-5px;top:50%;
+  transform:translateY(-50%);opacity:.04;color:#fff;letter-spacing:4px;
+}
+.admin-hero::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(circle at 90% 50%,rgba(0,212,255,.06),transparent 55%);
+}
+.admin-hero>*{position:relative;z-index:1;}
+.admin-hero-greet{font-size:13px;color:rgba(255,255,255,.5);font-weight:500;margin-bottom:2px;}
+.admin-hero-name{
+  font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;
+  background:linear-gradient(90deg,#fff,rgba(255,255,255,.7));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.admin-hero-gym{
+  font-size:11px;color:var(--blue);font-weight:700;
+  letter-spacing:2px;margin-top:3px;
+}
 
-/* ─── VIEW: MEMBER DASH ──────────────────── */
-#v-member-dash{padding-bottom:80px;}
-.member-hero{background:linear-gradient(135deg,var(--accent),var(--accent2));padding:28px 20px 24px;position:relative;overflow:hidden;}
-.member-hero::before{content:'FIT';font-family:'Bebas Neue',sans-serif;font-size:100px;position:absolute;right:-5px;top:50%;transform:translateY(-50%);opacity:.15;color:#fff;letter-spacing:4px;}
-.member-hero-greet{font-size:13px;color:rgba(255,255,255,.8);margin-bottom:2px;}
-.member-hero-name{font-family:'Bebas Neue',sans-serif;font-size:30px;color:#fff;letter-spacing:1px;}
-.member-hero-gym{font-size:12px;color:rgba(255,255,255,.7);font-weight:600;letter-spacing:1px;margin-top:2px;}
-.membership-card{background:var(--black);border-radius:var(--radius);padding:20px;margin:0 20px 20px;color:#fff;position:relative;overflow:hidden;}
-.membership-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:var(--accent);border-radius:50%;opacity:.15;}
-.membership-card-label{font-size:11px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:1px;text-transform:uppercase;}
-.membership-card-dates{font-family:'Bebas Neue',sans-serif;font-size:22px;margin-top:6px;color:#fff;}
-.membership-card-status{margin-top:12px;}
+/* ════════════════════════════════════════════════
+   VIEW: MEMBER DASHBOARD
+════════════════════════════════════════════════ */
+#v-member-dash{padding-bottom:80px;background:var(--black);}
+.member-hero{
+  background:linear-gradient(160deg,#1a0500,#2d0a00,#1a0200);
+  padding:28px 20px 24px;position:relative;overflow:hidden;
+}
+.member-hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(232,51,10,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(232,51,10,.03) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.member-hero::before{
+  content:'FIT';font-family:'Bebas Neue',sans-serif;
+  font-size:110px;position:absolute;right:-10px;top:50%;
+  transform:translateY(-50%);opacity:.05;color:#fff;letter-spacing:4px;
+}
+.member-hero::after{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(circle at 90% 50%,rgba(232,51,10,.12),transparent 55%);
+}
+.member-hero>*{position:relative;z-index:1;}
+.member-hero-greet{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:2px;}
+.member-hero-name{
+  font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;
+  background:linear-gradient(90deg,#fff,rgba(255,255,255,.7));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.member-hero-gym{font-size:11px;color:var(--accent2);font-weight:700;letter-spacing:2px;margin-top:3px;}
 
-/* ─── FORM VIEWS ─────────────────────────── */
-#v-record-payment, #v-add-member{padding-bottom:40px;}
+/* ════════════════════════════════════════════════
+   3D MEMBERSHIP CARD
+════════════════════════════════════════════════ */
+.membership-card-scene{
+  perspective:1200px;
+  margin:0 20px 20px;
+}
+.membership-card-3d{
+  width:100%;position:relative;
+  transform-style:preserve-3d;
+  transition:transform .7s cubic-bezier(.34,1.3,.64,1);
+  border-radius:var(--radius);
+  cursor:pointer;
+}
+.membership-card-3d.flipped{transform:rotateY(180deg);}
+.mc-face{
+  border-radius:var(--radius);padding:22px;
+  width:100%;position:relative;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  overflow:hidden;
+}
+/* FRONT FACE */
+.mc-front{
+  background:linear-gradient(160deg,#050a14,#0a1428,#0d1f40);
+  color:#fff;
+  border:1px solid rgba(0,212,255,.2);
+  box-shadow:0 20px 60px rgba(0,0,0,.6), 0 0 40px rgba(0,212,255,.1);
+  min-height:190px;
+}
+/* Holographic shimmer */
+.mc-holo{
+  position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(0,212,255,.04) 20%,
+    transparent 30%,
+    rgba(57,255,20,.04) 50%,
+    transparent 60%,
+    rgba(0,212,255,.04) 80%,
+    transparent 100%
+  );
+  background-size:200% 200%;
+  animation:holoShimmer 4s ease-in-out infinite;
+}
+@keyframes holoShimmer{
+  0%{background-position:0% 0%;}
+  50%{background-position:100% 100%;}
+  100%{background-position:0% 0%;}
+}
+/* Moving shimmer line */
+.mc-shimmer{
+  position:absolute;top:0;left:-150%;width:70%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
+  animation:shimmer 3.5s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes shimmer{0%{left:-150%}50%,100%{left:200%}}
+/* Glow orb on card */
+.mc-glow{
+  position:absolute;top:-30px;right:-30px;
+  width:120px;height:120px;
+  background:radial-gradient(circle,rgba(0,212,255,.2),transparent 70%);
+  border-radius:50%;
+}
+/* Circuit pattern */
+.mc-circuit{
+  position:absolute;bottom:0;left:0;right:0;height:60%;
+  background-image:
+    linear-gradient(rgba(0,212,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,212,255,.05) 1px,transparent 1px);
+  background-size:20px 20px;
+  -webkit-mask:linear-gradient(0deg,rgba(0,0,0,.3),transparent);
+  mask:linear-gradient(0deg,rgba(0,0,0,.3),transparent);
+}
 
-/* ─── INVOICE VIEW ───────────────────────── */
-#v-invoice{padding-bottom:100px;}
+/* CHIP */
+.mc-chip{
+  width:44px;height:33px;border-radius:6px;
+  background:linear-gradient(135deg,#c8a100,var(--gold),#ffe066);
+  margin-bottom:14px;position:relative;z-index:1;
+  box-shadow:0 3px 12px rgba(255,165,0,.5);
+}
+.mc-chip::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(0,0,0,.2);}
+.mc-chip::after{content:'';position:absolute;top:0;bottom:0;left:35%;width:1px;background:rgba(0,0,0,.15);}
 
-/* ─── EMPTY STATE ────────────────────────── */
-.empty-state{text-align:center;padding:50px 20px;color:var(--gray-500);}
-.empty-state i{font-size:48px;opacity:.3;margin-bottom:14px;display:block;}
-.empty-state p{font-size:14px;}
+.mc-plan-label{font-size:10px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:2px;text-transform:uppercase;position:relative;z-index:1;}
+.mc-member-name{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;
+  margin-top:6px;color:#fff;position:relative;z-index:1;
+}
+.mc-dates{font-size:12px;color:rgba(255,255,255,.5);position:relative;z-index:1;margin-top:4px;}
+.mc-status-row{margin-top:12px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+.mc-logo{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;color:rgba(0,212,255,.7);}
 
-/* ─── SEARCH BAR ─────────────────────────── */
-.search-bar{position:relative;margin:0 20px 16px;}
-.search-bar input{width:100%;padding:12px 16px 12px 42px;border:1.5px solid var(--gray-200);border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;background:var(--gray-50);outline:none;}
-.search-bar input:focus{border-color:var(--accent);}
-.search-bar i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:15px;}
+/* BACK FACE */
+.mc-back{
+  background:linear-gradient(160deg,var(--black3),var(--black4));
+  color:#fff;
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  transform:rotateY(180deg);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  min-height:190px;
+}
+.mc-stripe{
+  width:100%;height:44px;
+  background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.1),rgba(255,255,255,.06));
+  margin:0 0 16px;margin-left:-22px;width:calc(100% + 44px);
+}
 
-/* ─── FAB ────────────────────────────────── */
-.fab{position:fixed;bottom:90px;right:20px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 6px 24px rgba(232,51,10,.4);display:flex;align-items:center;justify-content:center;z-index:150;transition:transform .2s,box-shadow .2s;}
-.fab:active{transform:scale(.93);}
+/* ─── FORMS ──────────────────────────────────── */
+#v-record-payment,#v-add-member{padding-bottom:40px;background:var(--black);}
+#v-invoice{padding-bottom:100px;background:var(--black);}
 
-/* ─── DIVIDER ────────────────────────────── */
-.divider{border:none;border-top:1px solid var(--gray-200);margin:16px 0;}
+/* ─── OVERDUE ALERT ──────────────────────────── */
+.overdue-alert{
+  animation:overdueShake 2.5s ease-in-out infinite;
+  box-shadow:0 0 0 0 rgba(239,68,68,.4),0 4px 20px rgba(0,0,0,.4);
+}
+@keyframes overdueShake{
+  0%,90%,100%{transform:translateX(0);box-shadow:0 0 0 0 rgba(239,68,68,.4),0 4px 20px rgba(0,0,0,.4);}
+  92%{transform:translateX(-3px);}
+  94%{transform:translateX(3px);}
+  96%{transform:translateX(-2px);}
+  98%{transform:translateX(2px);}
+  50%{box-shadow:0 0 0 8px rgba(239,68,68,0),0 4px 20px rgba(239,68,68,.2);}
+}
 
-/* pulse dot */
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
-::-webkit-scrollbar{width:0;}
+/* ─── TIMELINE BAR ───────────────────────────── */
+.timeline-bar{
+  height:6px;background:rgba(255,255,255,.08);
+  border-radius:6px;overflow:hidden;margin-top:8px;
+  position:relative;
+}
+.timeline-fill{
+  height:100%;border-radius:6px;
+  background:linear-gradient(90deg,var(--blue),var(--neon));
+  box-shadow:0 0 10px rgba(0,212,255,.5);
+  transition:width 1.2s cubic-bezier(.34,1.3,.64,1);
+}
 
-/* ─── CHIP ───────────────────────────────── */
-.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--gray-100);color:var(--gray-700);cursor:pointer;border:none;transition:all .2s;}
-.chip.active{background:var(--black);color:#fff;}
+/* ─── BAR CHART (3D CSS) ─────────────────────── */
+.chart-wrap{
+  perspective:800px;
+  padding:20px 0 10px;
+  position:relative;
+}
+.bar-chart{
+  display:flex;align-items:flex-end;
+  gap:6px;height:100px;
+  transform:rotateX(10deg);
+  transform-origin:center bottom;
+}
+.bar-col{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.bar-label{font-size:8px;color:rgba(255,255,255,.35);font-family:'Rajdhani',sans-serif;letter-spacing:.5px;}
+.bar-3d{
+  width:100%;border-radius:4px 4px 0 0;
+  background:linear-gradient(180deg,var(--blue),var(--blue2));
+  box-shadow:0 -2px 8px rgba(0,212,255,.4), inset 0 1px 0 rgba(255,255,255,.2);
+  transform-origin:bottom;
+  transition:height 1s cubic-bezier(.34,1.3,.64,1);
+  height:0;
+  position:relative;
+  min-width:20px;
+}
+.bar-3d::after{
+  content:'';position:absolute;right:-3px;top:0;bottom:4px;width:3px;
+  background:linear-gradient(180deg,rgba(0,212,255,.6),rgba(0,144,204,.3));
+  border-radius:0 2px 2px 0;
+  /* side face illusion */
+  transform:skewY(-45deg) scaleX(1);
+}
 
-/* ─── LOADING ────────────────────────────── */
-.spinner{display:inline-block;width:20px;height:20px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ─── DONUT CHART ────────────────────────────── */
+.donut-wrap{
+  display:flex;align-items:center;justify-content:center;gap:20px;
+  padding:14px 0;
+}
+.donut-svg{filter:drop-shadow(0 0 12px rgba(0,212,255,.2));}
+.donut-legend{display:flex;flex-direction:column;gap:8px;}
+.donut-item{display:flex;align-items:center;gap:8px;font-size:12px;}
+.donut-dot{width:8px;height:8px;border-radius:50%;}
+.donut-label{color:rgba(255,255,255,.6);font-family:'Rajdhani',sans-serif;}
+.donut-val{font-weight:700;color:#fff;font-family:'Rajdhani',sans-serif;}
 
-/* Avatar colors */
-.av0{background:#E8330A;} .av1{background:#7c3aed;} .av2{background:#0891b2;}
-.av3{background:#16a34a;} .av4{background:#d97706;} .av5{background:#db2777;}
-
-/* Delete btn */
-.del-btn{background:none;border:none;color:var(--danger);cursor:pointer;font-size:15px;padding:6px;}
-
-/* ─── Quick action cards ─────────────────── */
-.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 20px;}
-.qa-card{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:8px;}
-.qa-card:active{background:var(--gray-100);transform:scale(.97);}
-.qa-card i{font-size:24px;color:var(--accent);}
-.qa-card span{font-weight:700;font-size:14px;}
-
-/* ─── Pending notice ─────────────────────── */
-.pending-notice{background:#fff7ed;border:1.5px solid #fed7aa;border-radius:var(--radius);padding:14px 16px;margin:0 20px 20px;display:flex;align-items:center;gap:12px;}
-.pending-notice i{font-size:22px;color:var(--warning);flex-shrink:0;}
-.pending-notice .pn-text{font-size:13px;line-height:1.5;}
-.pending-notice .pn-amount{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--warning);}
+/* ─── EXPIRY GLOW ────────────────────────────── */
+.expiry-urgent{
+  animation:expiryFire 1.5s ease-in-out infinite;
+}
+@keyframes expiryFire{
+  0%,100%{color:var(--warning);text-shadow:0 0 8px rgba(245,158,11,.5);}
+  50%{color:#ff6b00;text-shadow:0 0 16px rgba(255,107,0,.8), 0 0 30px rgba(255,107,0,.4);}
+}
 </style>
 </head>
 <body>
+
+<canvas id="particle-canvas"></canvas>
 
 <!-- ═══════════════════════════════════════════════ -->
 <!--  VIEW: LANDING                                  -->
@@ -325,21 +1173,38 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
 <div id="v-landing" class="view active">
   <div class="landing-hero">
     <div class="landing-dumbbell">
-      <svg width="72" height="72" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="24" width="10" height="16" rx="4" fill="#E8330A"/>
-        <rect x="50" y="24" width="10" height="16" rx="4" fill="#E8330A"/>
-        <rect x="12" y="20" width="8" height="24" rx="3" fill="#080808"/>
-        <rect x="44" y="20" width="8" height="24" rx="3" fill="#080808"/>
-        <rect x="20" y="28" width="24" height="8" rx="4" fill="#888"/>
-        <circle cx="32" cy="32" r="4" fill="#E8330A"/>
+      <svg width="96" height="96" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="db1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#00d4ff"/>
+            <stop offset="100%" stop-color="#E8330A"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <rect x="4" y="22" width="11" height="20" rx="4" fill="url(#db1)" filter="url(#glow)"/>
+        <rect x="49" y="22" width="11" height="20" rx="4" fill="url(#db1)" filter="url(#glow)"/>
+        <rect x="13" y="18" width="8" height="28" rx="3" fill="#1a1a2e"/>
+        <rect x="43" y="18" width="8" height="28" rx="3" fill="#1a1a2e"/>
+        <rect x="21" y="27" width="22" height="10" rx="5" fill="#2a2a4e"/>
+        <circle cx="32" cy="32" r="4" fill="#00d4ff" filter="url(#glow)"/>
+        <!-- shine -->
+        <rect x="5" y="23" width="3" height="6" rx="2" fill="rgba(255,255,255,0.3)"/>
+        <rect x="50" y="23" width="3" height="6" rx="2" fill="rgba(255,255,255,0.3)"/>
       </svg>
     </div>
-    <div class="bebas" style="font-size:36px;letter-spacing:3px;line-height:1.1;">THE FITNESS<br><span style="color:var(--accent);">PLANET GYM</span></div>
+
+    <div class="landing-gym-name bebas">
+      THE FITNESS<br><span>PLANET GYM</span>
+    </div>
     <div class="landing-accent-bar"></div>
-    <p class="landing-tagline">STRONGER EVERY DAY • TRACK YOUR PROGRESS</p>
+    <p class="landing-tagline">Stronger Every Day · Track Your Progress</p>
   </div>
+
   <div class="landing-ctas">
-    <button class="btn btn-black btn-full" onclick="showView('v-auth','admin')">
+    <button class="btn btn-steel btn-full" onclick="showView('v-auth','admin')">
       <i class="fas fa-user-shield"></i> Admin Login
     </button>
     <button class="btn btn-primary btn-full" onclick="showView('v-auth','member')">
@@ -348,50 +1213,39 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
     <p class="landing-cta-hint">Admin: <b>rohit_jaiswalll</b> / <b>rohit#7890</b></p>
   </div>
 
-  <!-- Social Strip -->
   <div class="social-strip" id="social-strip">
     <div class="social-strip-label">Follow Us</div>
     <div class="social-icons-row">
-
-      <!-- Instagram -->
       <div class="soc-wrap">
         <a href="https://www.instagram.com" target="_blank" class="social-btn insta" id="insta-btn" title="Instagram">
-          <svg class="soc-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-          </svg>
+          <svg class="soc-icon" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
         </a>
         <span class="soc-name">Instagram</span>
       </div>
-
-      <!-- Facebook -->
       <div class="soc-wrap">
         <a href="https://www.facebook.com" target="_blank" class="social-btn fb" id="fb-btn" title="Facebook">
-          <svg class="soc-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-          </svg>
+          <svg class="soc-icon" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         </a>
         <span class="soc-name">Facebook</span>
       </div>
-
     </div>
   </div>
-
-  <div style="text-align:center;padding:0 20px 30px;font-size:11px;color:var(--gray-500);">
+  <div style="text-align:center;padding:0 20px 30px;font-size:11px;color:rgba(255,255,255,.2);font-family:'Rajdhani',sans-serif;letter-spacing:.5px;">
     © 2026 The Fitness Planet GYM · All Rights Reserved
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<!--  VIEW: AUTH (Admin / Member)                    -->
+<!--  VIEW: AUTH                                     -->
 <!-- ═══════════════════════════════════════════════ -->
 <div id="v-auth" class="view">
   <div class="auth-hero">
+    <div class="auth-hero-grid"></div>
     <button class="auth-hero-back" onclick="showView('v-landing')"><i class="fas fa-arrow-left"></i></button>
     <div class="auth-hero-gym">THE FITNESS PLANET GYM</div>
     <div class="auth-hero-title" id="auth-title">ADMIN<br>LOGIN</div>
   </div>
   <div class="auth-body">
-    <!-- Admin login form -->
     <div id="auth-admin-form">
       <div class="input-group icon-left">
         <label>Username</label>
@@ -403,19 +1257,15 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
         <i class="fas fa-lock inp-icon"></i>
         <input type="password" id="admin-pass" placeholder="Enter password">
       </div>
-      <button class="btn btn-black btn-full" style="margin-top:8px;" onclick="adminLogin()">
+      <button class="btn btn-steel btn-full" style="margin-top:10px;" onclick="adminLogin()">
         <i class="fas fa-sign-in-alt"></i> Login as Admin
       </button>
     </div>
-
-    <!-- Member login/signup -->
     <div id="auth-member-form" style="display:none;">
       <div class="auth-toggle">
         <button class="auth-toggle-btn active" id="mem-login-tab" onclick="switchMemberTab('login')">Login</button>
         <button class="auth-toggle-btn" id="mem-signup-tab" onclick="switchMemberTab('signup')">Sign Up</button>
       </div>
-
-      <!-- Member Login -->
       <div id="mem-login-section">
         <div class="input-group icon-left">
           <label>Phone Number</label>
@@ -427,12 +1277,10 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
           <i class="fas fa-lock inp-icon"></i>
           <input type="password" id="mem-login-pass" placeholder="Enter password">
         </div>
-        <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="memberLogin()">
+        <button class="btn btn-primary btn-full" style="margin-top:10px;" onclick="memberLogin()">
           <i class="fas fa-sign-in-alt"></i> Login
         </button>
       </div>
-
-      <!-- Member Signup -->
       <div id="mem-signup-section" style="display:none;">
         <div class="input-group icon-left">
           <label>Full Name</label>
@@ -452,10 +1300,10 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
         <div class="input-group">
           <label>Membership Type</label>
           <select id="su-membership">
-            <option value="Monthly">Monthly</option>
-            <option value="Quarterly">Quarterly (3 Months)</option>
-            <option value="Half-Yearly">Half-Yearly (6 Months)</option>
-            <option value="Yearly">Yearly</option>
+            <option>Monthly</option>
+            <option>Quarterly</option>
+            <option>Half-Yearly</option>
+            <option>Yearly</option>
           </select>
         </div>
         <div class="input-group icon-left">
@@ -463,7 +1311,7 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
           <i class="fas fa-lock inp-icon"></i>
           <input type="password" id="su-pass" placeholder="Min. 6 characters">
         </div>
-        <button class="btn btn-primary btn-full" style="margin-top:8px;" onclick="memberSignup()">
+        <button class="btn btn-primary btn-full" style="margin-top:10px;" onclick="memberSignup()">
           <i class="fas fa-user-plus"></i> Create Account
         </button>
       </div>
@@ -476,8 +1324,9 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
 <!-- ═══════════════════════════════════════════════ -->
 <div id="v-admin-dash" class="view">
   <div class="admin-hero">
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px;">
-      <div style="width:52px;height:52px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;letter-spacing:1px;flex-shrink:0;border:2.5px solid rgba(255,255,255,.25);box-shadow:0 4px 16px rgba(232,51,10,.4);">RJ</div>
+    <div class="admin-hero-grid"></div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">
+      <div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--black);flex-shrink:0;border:2px solid rgba(0,212,255,.4);box-shadow:0 6px 24px rgba(0,212,255,.4), var(--shadow-glow-blue);">RJ</div>
       <div>
         <div class="admin-hero-greet" id="admin-greet-time">Good Morning ☀️</div>
         <div class="admin-hero-name">ROHIT JAISWAL</div>
@@ -485,14 +1334,13 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-      <div style="width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 1.8s ease-in-out infinite;"></div>
-      <span style="font-size:11px;color:rgba(255,255,255,.55);font-weight:600;">Active Session</span>
-      <span style="font-size:11px;color:rgba(255,255,255,.3);">·</span>
-      <span style="font-size:11px;color:rgba(255,255,255,.45);">+91 63904 62629</span>
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--neon);animation:pulse 1.8s ease-in-out infinite;box-shadow:0 0 8px var(--neon);"></div>
+      <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:600;font-family:'Rajdhani',sans-serif;letter-spacing:.5px;">Active Session</span>
+      <span style="font-size:11px;color:rgba(255,255,255,.2);">·</span>
+      <span style="font-size:11px;color:rgba(0,212,255,.6);font-family:'Rajdhani',sans-serif;">+91 63904 62629</span>
     </div>
   </div>
 
-  <!-- Tab Bar -->
   <div class="tab-bar" style="margin-top:20px;">
     <div class="tab-item active" id="atab-overview" onclick="switchAdminTab('overview')">Overview</div>
     <div class="tab-item" id="atab-members" onclick="switchAdminTab('members')">Members</div>
@@ -504,6 +1352,28 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
     <div class="dash-section">
       <div class="stat-grid" id="admin-stat-grid"></div>
     </div>
+
+    <!-- 3D Bar Chart -->
+    <div class="dash-section" style="margin-bottom:20px;">
+      <div class="dash-section-title" style="-webkit-text-fill-color:unset;background:none;color:rgba(255,255,255,.6);font-size:14px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;font-weight:700;margin-bottom:10px;">MONTHLY REVENUE</div>
+      <div class="glass-card" style="padding:16px 14px;">
+        <div class="chart-wrap">
+          <div class="bar-chart" id="revenue-bar-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donut Chart -->
+    <div class="dash-section" style="margin-bottom:20px;">
+      <div class="dash-section-title" style="-webkit-text-fill-color:unset;background:none;color:rgba(255,255,255,.6);font-size:14px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;font-weight:700;margin-bottom:10px;">PLAN DISTRIBUTION</div>
+      <div class="glass-card" style="padding:16px;">
+        <div class="donut-wrap" id="donut-chart-wrap">
+          <svg class="donut-svg" width="110" height="110" viewBox="0 0 110 110" id="donut-svg"></svg>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="dash-section">
       <div class="dash-section-title">Quick Actions</div>
     </div>
@@ -515,19 +1385,22 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
         <i class="fas fa-user-plus"></i><span>Add Member</span>
       </div>
       <div class="qa-card" onclick="switchAdminTab('payments')">
-        <i class="fas fa-receipt"></i><span>View All Payments</span>
+        <i class="fas fa-receipt"></i><span>All Payments</span>
       </div>
       <div class="qa-card" onclick="switchAdminTab('members')">
-        <i class="fas fa-users"></i><span>View Members</span>
+        <i class="fas fa-users"></i><span>Members</span>
       </div>
     </div>
+
     <div class="dash-section">
       <div class="dash-section-title">Recent Payments</div>
-      <div class="card card-p" id="admin-recent-payments"></div>
+      <div class="glass-card" style="padding:16px;" id="admin-recent-payments"></div>
     </div>
     <div style="padding:20px 20px 0;">
-      <div class="dash-section-title" style="color:var(--warning);">⚠ Pending / Overdue</div>
-      <div class="card card-p" id="admin-pending-list"></div>
+      <div class="dash-section-title" style="color:var(--warning);-webkit-text-fill-color:var(--warning);font-size:18px;">
+        <span>⚠ Pending / Overdue</span>
+      </div>
+      <div class="glass-card" style="padding:16px;" id="admin-pending-list"></div>
     </div>
   </div>
 
@@ -538,25 +1411,25 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
       <input type="text" id="member-search" placeholder="Search by name or phone…" oninput="renderMembersList()">
     </div>
     <div style="padding:0 20px 12px;display:flex;justify-content:flex-end;">
-      <button class="btn btn-primary btn-sm" onclick="showView('v-add-member')">
+      <button class="btn btn-blue btn-sm" onclick="showView('v-add-member')">
         <i class="fas fa-user-plus"></i> Add Member
       </button>
     </div>
     <div style="padding:0 20px 20px;">
-      <div class="card card-p" id="members-list-container"></div>
+      <div class="glass-card" style="padding:16px;" id="members-list-container"></div>
     </div>
   </div>
 
   <!-- PAYMENTS TAB -->
   <div id="admin-payments" style="display:none;">
-    <div style="padding:4px 20px 12px;display:flex;gap:8px;overflow-x:auto;">
+    <div style="padding:4px 20px 12px;display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <button class="chip active" id="pf-all" onclick="filterPayments('all')">All</button>
       <button class="chip" id="pf-paid" onclick="filterPayments('paid')">Paid</button>
       <button class="chip" id="pf-pending" onclick="filterPayments('pending')">Pending</button>
       <button class="chip" id="pf-upcoming" onclick="filterPayments('upcoming')">Upcoming</button>
     </div>
     <div style="padding:0 20px;">
-      <div class="card card-p" id="payments-list-container"></div>
+      <div class="glass-card" style="padding:16px;" id="payments-list-container"></div>
     </div>
   </div>
 
@@ -582,22 +1455,44 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
 <!-- ═══════════════════════════════════════════════ -->
 <div id="v-member-dash" class="view">
   <div class="member-hero">
+    <div class="member-hero-grid"></div>
     <div class="member-hero-greet" id="member-greet-time">Good Morning ☀️</div>
     <div class="member-hero-name" id="member-dash-name">MEMBER NAME</div>
     <div class="member-hero-gym">THE FITNESS PLANET GYM</div>
   </div>
 
-  <!-- Membership Status Card -->
-  <div class="membership-card" id="mem-status-card"></div>
+  <!-- 3D Membership Card -->
+  <div class="membership-card-scene" id="mem-status-card-scene">
+    <div class="membership-card-3d" id="mem-status-card-3d" onclick="this.classList.toggle('flipped')">
+      <!-- FRONT -->
+      <div class="mc-face mc-front">
+        <div class="mc-holo"></div>
+        <div class="mc-shimmer"></div>
+        <div class="mc-glow"></div>
+        <div class="mc-circuit"></div>
+        <div class="mc-chip"></div>
+        <div id="mem-status-card"></div>
+        <div class="mc-logo">🏋 FITNESS PLANET</div>
+      </div>
+      <!-- BACK -->
+      <div class="mc-face mc-back">
+        <div class="mc-stripe"></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;color:var(--blue);margin-bottom:12px;">🏋️ FITNESS PLANET GYM</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);font-weight:700;margin-bottom:8px;letter-spacing:1px;font-family:'Rajdhani',sans-serif;">PAYMENT HISTORY</div>
+        <div id="mc-back-history" style="font-size:12px;"></div>
+        <div style="margin-top:16px;font-size:10px;color:rgba(255,255,255,.25);text-align:center;font-family:'Rajdhani',sans-serif;letter-spacing:.5px;">TAP TO FLIP BACK</div>
+      </div>
+    </div>
+  </div>
 
   <!-- Pending notice -->
   <div id="mem-pending-notice" style="display:none;">
-    <div class="pending-notice">
+    <div class="pending-notice overdue-alert">
       <i class="fas fa-exclamation-triangle"></i>
       <div class="pn-text">
         You have a pending fee:<br>
         <span class="pn-amount" id="mem-pending-amount">₹0</span>
-        <br><small id="mem-pending-for"></small>
+        <br><small id="mem-pending-for" style="color:rgba(255,255,255,.4);"></small>
       </div>
     </div>
   </div>
@@ -607,10 +1502,23 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
     <div class="stat-grid" id="member-stat-grid"></div>
   </div>
 
+  <!-- Timeline bar -->
+  <div style="padding:0 20px 20px;">
+    <div class="glass-card" style="padding:16px;" id="member-timeline-card">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:1px;margin-bottom:6px;font-family:'Rajdhani',sans-serif;">MEMBERSHIP DURATION</div>
+      <div class="timeline-bar">
+        <div class="timeline-fill" id="timeline-fill" style="width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:rgba(255,255,255,.3);font-family:'Rajdhani',sans-serif;" id="timeline-labels">
+        <span>Start</span><span>End</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Payment History -->
   <div class="dash-section">
     <div class="dash-section-title">Payment History</div>
-    <div class="card card-p" id="member-payment-history"></div>
+    <div class="glass-card" style="padding:16px;" id="member-payment-history"></div>
   </div>
 
   <!-- Bottom Nav (Member) -->
@@ -619,7 +1527,7 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
       <i class="fas fa-home"></i>Home
     </button>
     <button class="bnav-item" onclick="showInvoiceFromMember()">
-      <i class="fas fa-receipt"></i>My Invoice
+      <i class="fas fa-receipt"></i>Invoice
     </button>
     <button class="bnav-item" onclick="logout()">
       <i class="fas fa-sign-out-alt"></i>Logout
@@ -628,20 +1536,18 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<!--  VIEW: RECORD PAYMENT (Admin)                   -->
+<!--  VIEW: RECORD PAYMENT                           -->
 <!-- ═══════════════════════════════════════════════ -->
 <div id="v-record-payment" class="view">
   <div class="topbar">
     <button class="topbar-back" onclick="showView('v-admin-dash')"><i class="fas fa-arrow-left"></i></button>
     <div class="topbar-title">Record Payment</div>
-    <div style="width:32px;"></div>
+    <div style="width:38px;"></div>
   </div>
   <div style="padding:20px;">
     <div class="input-group">
       <label>Select Member</label>
-      <select id="rp-member">
-        <option value="">-- Choose a Member --</option>
-      </select>
+      <select id="rp-member"><option value="">-- Choose a Member --</option></select>
     </div>
     <div class="input-group">
       <label>Payment From Date</label>
@@ -664,23 +1570,21 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
       <label>Notes (Optional)</label>
       <input type="text" id="rp-notes" placeholder="Any remarks…" autocomplete="off">
     </div>
-    <button class="btn btn-primary btn-full" style="margin-top:6px;" onclick="recordPayment()">
+    <button class="btn btn-neon btn-full" style="margin-top:8px;" id="pay-btn" onclick="recordPayment()">
       <i class="fas fa-check-circle"></i> Confirm & Generate Invoice
     </button>
-    <button class="btn btn-ghost btn-full" style="margin-top:10px;" onclick="showView('v-admin-dash')">
-      Cancel
-    </button>
+    <button class="btn btn-ghost btn-full" style="margin-top:10px;" onclick="showView('v-admin-dash')">Cancel</button>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<!--  VIEW: ADD MEMBER (Admin)                       -->
+<!--  VIEW: ADD MEMBER                               -->
 <!-- ═══════════════════════════════════════════════ -->
 <div id="v-add-member" class="view">
   <div class="topbar">
     <button class="topbar-back" onclick="showView('v-admin-dash')"><i class="fas fa-arrow-left"></i></button>
     <div class="topbar-title">Add New Member</div>
-    <div style="width:32px;"></div>
+    <div style="width:38px;"></div>
   </div>
   <div style="padding:20px;">
     <div class="input-group icon-left">
@@ -716,12 +1620,10 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
       <i class="fas fa-lock inp-icon"></i>
       <input type="text" id="am-pass" placeholder="Set member's password" autocomplete="off">
     </div>
-    <button class="btn btn-black btn-full" style="margin-top:6px;" onclick="addMember()">
+    <button class="btn btn-blue btn-full" style="margin-top:8px;" onclick="addMember()">
       <i class="fas fa-user-plus"></i> Add Member
     </button>
-    <button class="btn btn-ghost btn-full" style="margin-top:10px;" onclick="showView('v-admin-dash')">
-      Cancel
-    </button>
+    <button class="btn btn-ghost btn-full" style="margin-top:10px;" onclick="showView('v-admin-dash')">Cancel</button>
   </div>
 </div>
 
@@ -732,12 +1634,12 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
   <div class="topbar">
     <button class="topbar-back" onclick="goBackFromInvoice()"><i class="fas fa-arrow-left"></i></button>
     <div class="topbar-title">Invoice</div>
-    <div style="width:32px;"></div>
+    <div style="width:38px;"></div>
   </div>
   <div style="padding:20px 20px 100px;">
     <div class="invoice-box" id="invoice-content"></div>
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px;">
-      <button class="btn btn-success btn-full" id="wa-btn" onclick="sendWhatsApp()">
+      <button class="btn btn-success btn-full" onclick="sendWhatsApp()">
         <i class="fab fa-whatsapp" style="font-size:20px;"></i> Send via WhatsApp
       </button>
       <button class="btn btn-ghost btn-full" onclick="goBackFromInvoice()">
@@ -747,14 +1649,14 @@ body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--black);
   </div>
 </div>
 
-<!-- ── TOAST ── -->
+<!-- TOAST -->
 <div id="toast"></div>
 
 <!-- ═══════════════════════════════════════════════ -->
 <!--  JAVASCRIPT                                     -->
 <!-- ═══════════════════════════════════════════════ -->
 <script>
-// ─── DATA STORE (in-memory) ───────────────────────────────────
+// ─── DATA STORE ───────────────────────────────────────────────
 const store = {
   admin: { username: 'rohit_jaiswalll', password: 'rohit#7890', name: 'Rohit Jaiswal', phone: '6390462629' },
   members: [
@@ -778,13 +1680,10 @@ const store = {
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────
-function genId(prefix) {
-  return prefix + Math.random().toString(36).substr(2,6).toUpperCase();
-}
+function genId(prefix) { return prefix + Math.random().toString(36).substr(2,6).toUpperCase(); }
 function fmtDate(d) {
   if (!d) return '—';
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
 }
 function fmtINR(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
 function today() { return new Date().toISOString().split('T')[0]; }
@@ -795,63 +1694,237 @@ function getGreeting() {
   return 'Good Evening 🌙';
 }
 function avatarColor(name) {
-  const classes = ['av0','av1','av2','av3','av4','av5'];
-  return classes[(name.charCodeAt(0) || 0) % classes.length];
+  return ['av0','av1','av2','av3','av4','av5'][(name.charCodeAt(0)||0)%6];
 }
 function initials(name) { return name.split(' ').map(w=>w[0]).join('').substr(0,2).toUpperCase(); }
-function getMemberById(id) { return store.members.find(m => m.id === id); }
-function getMemberPayments(memberId) { return store.payments.filter(p => p.memberId === memberId); }
+function getMemberById(id) { return store.members.find(m=>m.id===id); }
+function getMemberPayments(memberId) { return store.payments.filter(p=>p.memberId===memberId); }
 function getLatestPaidPayment(memberId) {
-  return store.payments.filter(p => p.memberId === memberId && p.status === 'paid')
-    .sort((a,b) => new Date(b.toDate) - new Date(a.toDate))[0];
+  return store.payments.filter(p=>p.memberId===memberId&&p.status==='paid')
+    .sort((a,b)=>new Date(b.toDate)-new Date(a.toDate))[0];
 }
-function getPendingPayments(memberId) {
-  return store.payments.filter(p => p.memberId === memberId && p.status === 'pending');
-}
+function getPendingPayments(memberId) { return store.payments.filter(p=>p.memberId===memberId&&p.status==='pending'); }
 function getMembershipStatus(memberId) {
   const latest = getLatestPaidPayment(memberId);
-  if (!latest) return { status: 'inactive', label: 'No Active Plan', color: 'var(--gray-500)', expires: null };
-  const exp = new Date(latest.toDate + 'T00:00:00');
-  const now = new Date();
-  now.setHours(0,0,0,0);
+  if (!latest) return { status:'inactive', label:'No Active Plan', diff:null };
+  const exp = new Date(latest.toDate+'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
   const diff = Math.ceil((exp - now) / 86400000);
-  if (diff < 0) return { status: 'expired', label: 'Expired', color: 'var(--danger)', expires: latest.toDate, diff };
-  if (diff <= 7) return { status: 'expiring', label: `Expires in ${diff} day${diff===1?'':'s'}`, color: 'var(--warning)', expires: latest.toDate, diff };
-  return { status: 'active', label: `Active · ${diff} days left`, color: 'var(--success)', expires: latest.toDate, diff };
+  if (diff < 0) return { status:'expired', label:'Expired', expires:latest.toDate, diff };
+  if (diff <= 7) return { status:'expiring', label:`Expires in ${diff} day${diff===1?'':'s'}`, expires:latest.toDate, diff };
+  return { status:'active', label:`Active · ${diff} days left`, expires:latest.toDate, diff };
 }
+
+// ─── TOAST ────────────────────────────────────────────────────
 function toast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'show ' + type;
-  setTimeout(() => { t.className = ''; }, 3000);
+  setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// ─── CONFETTI ─────────────────────────────────────────────────
+function spawnConfetti(x, y) {
+  const colors = ['#00d4ff','#39ff14','#E8330A','#FF6B35','#ffd700','#ec4899','#a855f7'];
+  for (let i = 0; i < 40; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const size = 6 + Math.random() * 10;
+    const isCircle = Math.random() > .5;
+    el.style.cssText = `
+      left:${x+(Math.random()-.5)*120}px;top:${y}px;
+      width:${size}px;height:${size}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius:${isCircle?'50%':'3px'};
+      animation-duration:${1.2+Math.random()*1.8}s;
+      animation-delay:${Math.random()*.4}s;
+      box-shadow:0 0 6px currentColor;
+    `;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 2800);
+  }
+}
+
+function floatScore(amount, x, y) {
+  const el = document.createElement('div');
+  el.className = 'float-score';
+  el.textContent = '+' + fmtINR(amount);
+  el.style.cssText = `left:${x-50}px;top:${y-60}px;`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1800);
+}
+
+// ─── COUNTER ANIMATION ─────────────────────────────────────────
+function animateCounter(el, target, duration=900) {
+  const isINR = el.dataset.fmt === 'inr';
+  const start = performance.now();
+  const update = (now) => {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const v = Math.round(eased * target);
+    el.textContent = isINR ? fmtINR(v) : v;
+    if (p < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+function runCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    animateCounter(el, parseInt(el.dataset.count));
+  });
+}
+
+// ─── 3D TILT ──────────────────────────────────────────────────
+let tiltRAF = null;
+function initTilt(selector) {
+  document.querySelectorAll(selector).forEach(el => {
+    let rafId;
+    el.addEventListener('mousemove', e => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - .5;
+        const y = (e.clientY - r.top) / r.height - .5;
+        el.style.transform = `perspective(600px) rotateY(${x*14}deg) rotateX(${-y*10}deg) translateY(-6px) scale(1.02)`;
+      });
+    });
+    el.addEventListener('mouseleave', () => {
+      cancelAnimationFrame(rafId);
+      el.style.transform = '';
+    });
+  });
+}
+
+// ─── PARALLAX MEMBERSHIP CARD ──────────────────────────────────
+function initCardParallax() {
+  const scene = document.getElementById('mem-status-card-scene');
+  const card = document.getElementById('mem-status-card-3d');
+  if (!scene || !card) return;
+  let rafId;
+  scene.addEventListener('mousemove', e => {
+    if (card.classList.contains('flipped')) return;
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      const r = scene.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5;
+      const y = (e.clientY - r.top) / r.height - .5;
+      card.style.transform = `perspective(1200px) rotateY(${x*18}deg) rotateX(${-y*12}deg)`;
+    });
+  });
+  scene.addEventListener('mouseleave', () => {
+    cancelAnimationFrame(rafId);
+    if (!card.classList.contains('flipped')) card.style.transform = '';
+  });
+}
+
+// ─── 3D BAR CHART ─────────────────────────────────────────────
+function renderBarChart() {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now = new Date();
+  // Build last 6 months revenue
+  const data = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const m = d.getMonth(); const y = d.getFullYear();
+    const rev = store.payments
+      .filter(p => p.status==='paid' && p.paidDate && new Date(p.paidDate).getMonth()===m && new Date(p.paidDate).getFullYear()===y)
+      .reduce((s,p)=>s+p.amount, 0);
+    data.push({ label: months[m], value: rev });
+  }
+  const max = Math.max(...data.map(d=>d.value), 100);
+  const chart = document.getElementById('revenue-bar-chart');
+  chart.innerHTML = data.map(d => {
+    const pct = (d.value / max) * 100;
+    return `<div class="bar-col">
+      <div class="bar-3d" style="height:0%" data-height="${pct}%"></div>
+      <div class="bar-label">${d.label}</div>
+    </div>`;
+  }).join('');
+  // Animate bars in
+  setTimeout(() => {
+    chart.querySelectorAll('.bar-3d').forEach((b, i) => {
+      setTimeout(() => { b.style.height = b.dataset.height; }, i * 80);
+    });
+  }, 200);
+}
+
+// ─── DONUT CHART ──────────────────────────────────────────────
+function renderDonutChart() {
+  const plans = {};
+  store.payments.filter(p=>p.status==='paid').forEach(p => {
+    plans[p.plan] = (plans[p.plan]||0) + 1;
+  });
+  const total = Object.values(plans).reduce((s,v)=>s+v, 0);
+  if (total === 0) return;
+
+  const colors = ['#00d4ff','#39ff14','#ffd700','#E8330A','#a855f7'];
+  const keys = Object.keys(plans);
+  const cx = 55, cy = 55, r = 38, gap = 4;
+
+  let startAngle = -Math.PI / 2;
+  const svg = document.getElementById('donut-svg');
+  const legend = document.getElementById('donut-legend');
+  svg.innerHTML = '';
+  legend.innerHTML = '';
+
+  keys.forEach((k, i) => {
+    const frac = plans[k] / total;
+    const angle = frac * 2 * Math.PI;
+    const endAngle = startAngle + angle;
+    const innerR = 22;
+    const x1 = cx + r * Math.cos(startAngle);
+    const y1 = cy + r * Math.sin(startAngle);
+    const x2 = cx + r * Math.cos(endAngle);
+    const y2 = cy + r * Math.sin(endAngle);
+    const ix1 = cx + innerR * Math.cos(startAngle);
+    const iy1 = cy + innerR * Math.sin(startAngle);
+    const ix2 = cx + innerR * Math.cos(endAngle);
+    const iy2 = cy + innerR * Math.sin(endAngle);
+    const large = angle > Math.PI ? 1 : 0;
+    const color = colors[i % colors.length];
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${ix1} ${iy1} A ${innerR} ${innerR} 0 ${large} 1 ${ix2} ${iy2} L ${x2} ${y2} A ${r} ${r} 0 ${large} 0 ${x1} ${y1} Z`);
+    path.setAttribute('fill', color);
+    path.setAttribute('opacity', '.9');
+    path.style.filter = `drop-shadow(0 0 4px ${color})`;
+    svg.appendChild(path);
+    startAngle = endAngle;
+
+    legend.innerHTML += `<div class="donut-item">
+      <div class="donut-dot" style="background:${color};box-shadow:0 0 6px ${color};"></div>
+      <span class="donut-label">${k}</span>
+      <span class="donut-val">${plans[k]}</span>
+    </div>`;
+  });
+
+  // Center text
+  const cText = document.createElementNS('http://www.w3.org/2000/svg','text');
+  cText.setAttribute('x', cx); cText.setAttribute('y', cy+1);
+  cText.setAttribute('text-anchor','middle');cText.setAttribute('dominant-baseline','middle');
+  cText.setAttribute('fill','#fff');cText.setAttribute('font-family','Bebas Neue');
+  cText.setAttribute('font-size','18');cText.textContent = total;
+  svg.appendChild(cText);
+  const cLabel = document.createElementNS('http://www.w3.org/2000/svg','text');
+  cLabel.setAttribute('x', cx); cLabel.setAttribute('y', cy+14);
+  cLabel.setAttribute('text-anchor','middle');cLabel.setAttribute('dominant-baseline','middle');
+  cLabel.setAttribute('fill','rgba(255,255,255,0.4)');cLabel.setAttribute('font-size','7');
+  cLabel.setAttribute('font-family','Rajdhani');cLabel.textContent = 'PAID';
+  svg.appendChild(cLabel);
 }
 
 // ─── ROUTING ──────────────────────────────────────────────────
 function showView(id, extra) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
 
-  // Handle view entry logic
-  if (id === 'v-auth') {
-    store.authMode = extra || 'admin';
-    setupAuthView();
-  }
-  if (id === 'v-admin-dash') {
-    renderAdminDash();
-    // reset to overview
-    switchAdminTab('overview');
-  }
-  if (id === 'v-member-dash') {
-    renderMemberDash();
-  }
-  if (id === 'v-record-payment') {
-    setupRecordPayment();
-  }
-  if (id === 'v-add-member') {
-    document.getElementById('am-join-date').value = today();
-    clearAddMemberForm();
-  }
+  if (id==='v-auth') { store.authMode=extra||'admin'; setupAuthView(); }
+  if (id==='v-admin-dash') { renderAdminDash(); switchAdminTab('overview'); }
+  if (id==='v-member-dash') { renderMemberDash(); }
+  if (id==='v-record-payment') { setupRecordPayment(); }
+  if (id==='v-add-member') { document.getElementById('am-join-date').value=today(); clearAddMemberForm(); }
+
+  setTimeout(()=>initTilt('.stat-card'), 120);
 }
 
 function setupAuthView() {
@@ -865,30 +1938,25 @@ function setupAuthView() {
 function adminLogin() {
   const u = document.getElementById('admin-user').value.trim();
   const p = document.getElementById('admin-pass').value;
-  if (!u || !p) { toast('Please fill all fields', 'error'); return; }
-  if (u === store.admin.username && p === store.admin.password) {
+  if (!u||!p) { toast('Please fill all fields', 'error'); return; }
+  if (u===store.admin.username && p===store.admin.password) {
     store.currentUser = store.admin;
     store.currentRole = 'admin';
-    toast('Welcome back, Rohit! 💪🏋️', 'success');
+    toast('Welcome back, Rohit! 💪', 'success');
     showView('v-admin-dash');
-  } else {
-    toast('Invalid credentials!', 'error');
-  }
+  } else { toast('Invalid credentials!', 'error'); }
 }
 
 function memberLogin() {
   const phone = document.getElementById('mem-login-phone').value.trim();
   const pass = document.getElementById('mem-login-pass').value;
-  if (!phone || !pass) { toast('Please fill all fields', 'error'); return; }
-  const member = store.members.find(m => m.phone === phone && m.password === pass);
+  if (!phone||!pass) { toast('Please fill all fields', 'error'); return; }
+  const member = store.members.find(m=>m.phone===phone&&m.password===pass);
   if (member) {
-    store.currentUser = member;
-    store.currentRole = 'member';
+    store.currentUser=member; store.currentRole='member';
     toast(`Welcome, ${member.name.split(' ')[0]}! 💪`, 'success');
     showView('v-member-dash');
-  } else {
-    toast('Invalid phone or password!', 'error');
-  }
+  } else { toast('Invalid phone or password!', 'error'); }
 }
 
 function memberSignup() {
@@ -897,19 +1965,13 @@ function memberSignup() {
   const email = document.getElementById('su-email').value.trim();
   const membership = document.getElementById('su-membership').value;
   const pass = document.getElementById('su-pass').value;
-
-  if (!name || !phone || !email || !pass) { toast('Please fill all fields', 'error'); return; }
-  if (phone.length < 10) { toast('Enter valid 10-digit phone', 'error'); return; }
-  if (pass.length < 6) { toast('Password must be 6+ characters', 'error'); return; }
-  if (store.members.find(m => m.phone === phone)) { toast('Phone already registered!', 'error'); return; }
-
-  const newMember = {
-    id: genId('m'), name, phone, email, membershipType: membership,
-    joinDate: today(), password: pass
-  };
-  store.members.push(newMember);
-  store.currentUser = newMember;
-  store.currentRole = 'member';
+  if (!name||!phone||!email||!pass) { toast('Please fill all fields', 'error'); return; }
+  if (phone.length<10) { toast('Enter valid 10-digit phone', 'error'); return; }
+  if (pass.length<6) { toast('Password must be 6+ characters', 'error'); return; }
+  if (store.members.find(m=>m.phone===phone)) { toast('Phone already registered!', 'error'); return; }
+  const nm = { id:genId('m'), name, phone, email, membershipType:membership, joinDate:today(), password:pass };
+  store.members.push(nm);
+  store.currentUser=nm; store.currentRole='member';
   toast(`Account created! Welcome ${name.split(' ')[0]}! 🎉`, 'success');
   showView('v-member-dash');
 }
@@ -917,119 +1979,114 @@ function memberSignup() {
 function switchMemberTab(tab) {
   document.getElementById('mem-login-tab').classList.toggle('active', tab==='login');
   document.getElementById('mem-signup-tab').classList.toggle('active', tab==='signup');
-  document.getElementById('mem-login-section').style.display = tab==='login' ? '' : 'none';
-  document.getElementById('mem-signup-section').style.display = tab==='signup' ? '' : 'none';
+  document.getElementById('mem-login-section').style.display = tab==='login'?'':'none';
+  document.getElementById('mem-signup-section').style.display = tab==='signup'?'':'none';
 }
 
 function logout() {
-  store.currentUser = null;
-  store.currentRole = null;
+  store.currentUser=null; store.currentRole=null;
   toast('Logged out. See you soon! 👋');
   showView('v-landing');
-  // re-trigger social animation on return
-  setTimeout(() => triggerSocialAnimation(), 400);
+  setTimeout(()=>triggerSocialAnimation(), 400);
 }
 
 // ─── ADMIN DASHBOARD ──────────────────────────────────────────
 function renderAdminDash() {
   document.getElementById('admin-greet-time').textContent = getGreeting();
-
-  // Stats
   const totalMembers = store.members.length;
-  const paidCount = store.payments.filter(p => p.status === 'paid').length;
-  const pendingCount = store.payments.filter(p => p.status === 'pending').length;
-  const totalRevenue = store.payments.filter(p => p.status === 'paid').reduce((s,p)=>s+Number(p.amount),0);
+  const paidCount = store.payments.filter(p=>p.status==='paid').length;
+  const pendingCount = store.payments.filter(p=>p.status==='pending').length;
+  const totalRevenue = store.payments.filter(p=>p.status==='paid').reduce((s,p)=>s+Number(p.amount),0);
 
   document.getElementById('admin-stat-grid').innerHTML = `
-    <div class="stat-card sc-black">
-      <div class="stat-icon">👥</div>
-      <div class="stat-val">${totalMembers}</div>
-      <div class="stat-lbl">TOTAL MEMBERS</div>
+    <div class="stat-card sc-blue stagger-child" style="animation-delay:.05s">
+      <div class="card-shine"></div>
+      <div class="stat-icon" style="color:var(--blue);">👥</div>
+      <div class="stat-val" data-count="${totalMembers}" style="color:var(--blue);">0</div>
+      <div class="stat-lbl" style="color:rgba(0,212,255,.6);">TOTAL MEMBERS</div>
     </div>
-    <div class="stat-card sc-red">
-      <div class="stat-icon">💰</div>
-      <div class="stat-val">${fmtINR(totalRevenue)}</div>
-      <div class="stat-lbl">TOTAL REVENUE</div>
+    <div class="stat-card sc-red stagger-child" style="animation-delay:.12s">
+      <div class="card-shine"></div>
+      <div class="stat-icon" style="color:var(--accent2);">💰</div>
+      <div class="stat-val" data-count="${totalRevenue}" data-fmt="inr" style="color:#fff;font-size:24px;">₹0</div>
+      <div class="stat-lbl" style="color:rgba(255,107,53,.7);">TOTAL REVENUE</div>
     </div>
-    <div class="stat-card sc-green">
+    <div class="stat-card sc-neon stagger-child" style="animation-delay:.19s">
+      <div class="card-shine"></div>
       <div class="stat-icon">✅</div>
-      <div class="stat-val">${paidCount}</div>
-      <div class="stat-lbl">PAID RECORDS</div>
+      <div class="stat-val" data-count="${paidCount}">0</div>
+      <div class="stat-lbl" style="color:rgba(57,255,20,.6);">PAID RECORDS</div>
     </div>
-    <div class="stat-card sc-orange">
+    <div class="stat-card sc-gold stagger-child" style="animation-delay:.26s">
+      <div class="card-shine"></div>
       <div class="stat-icon">⏳</div>
-      <div class="stat-val">${pendingCount}</div>
-      <div class="stat-lbl">PENDING</div>
+      <div class="stat-val" data-count="${pendingCount}">0</div>
+      <div class="stat-lbl" style="color:rgba(255,215,0,.6);">PENDING</div>
     </div>
   `;
+  setTimeout(runCounters, 120);
 
-  // Recent Payments
-  const recent = [...store.payments].filter(p=>p.status==='paid').sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate)).slice(0,4);
-  const recentEl = document.getElementById('admin-recent-payments');
-  if (recent.length === 0) {
-    recentEl.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>No payments yet</p></div>`;
-  } else {
-    recentEl.innerHTML = recent.map(p => payRowHTML(p, true)).join('');
-  }
+  const recent = [...store.payments].filter(p=>p.status==='paid')
+    .sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate)).slice(0,4);
+  const rEl = document.getElementById('admin-recent-payments');
+  rEl.innerHTML = recent.length===0
+    ? `<div class="empty-state"><i class="fas fa-receipt"></i><p>No payments yet</p></div>`
+    : recent.map(p=>payRowHTML(p,true)).join('');
 
-  // Pending list
-  const pending = store.payments.filter(p => p.status === 'pending');
-  const pendingEl = document.getElementById('admin-pending-list');
-  if (pending.length === 0) {
-    pendingEl.innerHTML = `<div class="empty-state" style="padding:30px 20px;"><i class="fas fa-check-circle" style="color:var(--success);"></i><p>No pending payments! 🎉</p></div>`;
-  } else {
-    pendingEl.innerHTML = pending.map(p => payRowHTML(p, true)).join('');
-  }
+  const pending = store.payments.filter(p=>p.status==='pending');
+  const pEl = document.getElementById('admin-pending-list');
+  pEl.innerHTML = pending.length===0
+    ? `<div class="empty-state" style="padding:28px 20px;"><i class="fas fa-check-circle" style="color:var(--neon);"></i><p style="color:var(--neon);">No pending payments! 🎉</p></div>`
+    : pending.map(p=>payRowHTML(p,true,true)).join('');
 
+  setTimeout(()=>{ renderBarChart(); renderDonutChart(); }, 100);
   renderMembersList();
   renderPaymentsList();
 }
 
-function payRowHTML(p, showName=false) {
+function payRowHTML(p, showName=false, overdue=false) {
   const statusBadge = {
-    paid: `<span class="badge badge-success">✓ Paid</span>`,
-    pending: `<span class="badge badge-warning">⏳ Pending</span>`,
-    upcoming: `<span class="badge badge-info">🔔 Upcoming</span>`,
+    paid:`<span class="badge badge-success">✓ Paid</span>`,
+    pending:`<span class="badge badge-warning badge-pulse">⏳ Pending</span>`,
+    upcoming:`<span class="badge badge-info">🔔 Upcoming</span>`,
   }[p.status] || '';
+  const amtColor = p.status==='paid'?'var(--neon)':'var(--warning)';
+  const rowClass = overdue ? 'pay-row overdue-alert' : 'pay-row';
   return `
-  <div class="pay-row" onclick="viewInvoice('${p.id}','admin')">
+  <div class="${rowClass}" onclick="viewInvoice('${p.id}','admin')">
     <div class="pay-row-left">
       <div class="pay-row-name">${showName ? p.memberName : p.plan}</div>
       <div class="pay-row-date">${fmtDate(p.fromDate)} → ${fmtDate(p.toDate)}</div>
       <div style="margin-top:4px;">${statusBadge}</div>
     </div>
     <div style="text-align:right;">
-      <div class="pay-row-amount" style="color:${p.status==='paid'?'var(--success)':'var(--warning)'};">
-        ${fmtINR(p.amount)}
-      </div>
-      ${p.status==='paid'?`<div style="font-size:11px;color:var(--gray-500);">${fmtDate(p.paidDate)}</div>`:''}
+      <div class="pay-row-amount" style="color:${amtColor};text-shadow:0 0 10px ${amtColor}30;">${fmtINR(p.amount)}</div>
+      ${p.status==='paid'?`<div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px;">${fmtDate(p.paidDate)}</div>`:''}
     </div>
   </div>`;
 }
 
 function renderMembersList() {
-  const query = (document.getElementById('member-search')?.value || '').toLowerCase();
-  const list = store.members.filter(m =>
-    m.name.toLowerCase().includes(query) || m.phone.includes(query)
-  );
+  const q = (document.getElementById('member-search')?.value||'').toLowerCase();
+  const list = store.members.filter(m=>m.name.toLowerCase().includes(q)||m.phone.includes(q));
   const el = document.getElementById('members-list-container');
-  if (list.length === 0) {
-    el.innerHTML = `<div class="empty-state"><i class="fas fa-users"></i><p>No members found</p></div>`;
-    return;
+  if (list.length===0) {
+    el.innerHTML=`<div class="empty-state"><i class="fas fa-users"></i><p>No members found</p></div>`; return;
   }
-  el.innerHTML = list.map(m => {
+  el.innerHTML = list.map((m,i) => {
     const s = getMembershipStatus(m.id);
-    const statusColor = s.status==='active' ? 'var(--success)' : s.status==='expiring' ? 'var(--warning)' : 'var(--danger)';
-    return `
-    <div class="member-row">
+    const colors = { active:'var(--neon)', expiring:'var(--warning)', expired:'var(--danger)', inactive:'rgba(255,255,255,.3)' };
+    const c = colors[s.status]||colors.inactive;
+    const isExpiring = s.status==='expiring';
+    return `<div class="member-row stagger-child" style="animation-delay:${i*.06}s">
       <div class="member-avatar ${avatarColor(m.name)}">${initials(m.name)}</div>
       <div class="member-info">
         <div class="member-name">${m.name}</div>
         <div class="member-phone">${m.phone} · ${m.membershipType}</div>
-        <div style="font-size:11px;margin-top:2px;color:${statusColor};font-weight:700;">${s.label}</div>
+        <div style="font-size:11px;margin-top:2px;color:${c};font-weight:700;font-family:'Rajdhani',sans-serif;${isExpiring?'animation:expiryFire 1.5s ease-in-out infinite;':''}">${s.label}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-        <button class="btn btn-sm btn-outline" style="padding:6px 10px;font-size:12px;" onclick="recordPaymentFor('${m.id}')">
+        <button class="btn btn-blue btn-sm" style="padding:7px 10px;font-size:12px;" onclick="recordPaymentFor('${m.id}')">
           <i class="fas fa-plus"></i> Pay
         </button>
         <button class="del-btn" onclick="deleteMember('${m.id}')"><i class="fas fa-trash"></i></button>
@@ -1039,39 +2096,38 @@ function renderMembersList() {
 }
 
 function renderPaymentsList() {
-  const f = store.paymentFilter || 'all';
-  let list = [...store.payments].sort((a,b) => new Date(b.fromDate) - new Date(a.fromDate));
-  if (f !== 'all') list = list.filter(p => p.status === f);
+  const f = store.paymentFilter||'all';
+  let list = [...store.payments].sort((a,b)=>new Date(b.fromDate)-new Date(a.fromDate));
+  if (f!=='all') list = list.filter(p=>p.status===f);
   const el = document.getElementById('payments-list-container');
-  if (list.length === 0) {
-    el.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>No payments found</p></div>`;
-    return;
+  if (list.length===0) {
+    el.innerHTML=`<div class="empty-state"><i class="fas fa-receipt"></i><p>No payments found</p></div>`; return;
   }
-  el.innerHTML = list.map(p => payRowHTML(p, true)).join('');
+  el.innerHTML = list.map(p=>payRowHTML(p,true)).join('');
 }
 
 function filterPayments(f) {
   store.paymentFilter = f;
-  ['all','paid','pending','upcoming'].forEach(k => {
-    document.getElementById('pf-'+k)?.classList.toggle('active', k === f);
+  ['all','paid','pending','upcoming'].forEach(k=>{
+    document.getElementById('pf-'+k)?.classList.toggle('active', k===f);
   });
   renderPaymentsList();
 }
 
 function switchAdminTab(tab) {
-  ['overview','members','payments'].forEach(t => {
+  ['overview','members','payments'].forEach(t=>{
     document.getElementById('admin-'+t).style.display = t===tab?'':'none';
     document.getElementById('atab-'+t)?.classList.toggle('active', t===tab);
   });
-  if (tab === 'members') renderMembersList();
-  if (tab === 'payments') renderPaymentsList();
+  if (tab==='members') renderMembersList();
+  if (tab==='payments') renderPaymentsList();
 }
 
 function switchAdminNav(nav) {
-  ['home','members','payments','logout'].forEach(k => {
-    document.getElementById('anav-'+k)?.classList.toggle('active', k===nav);
+  ['home','members','payments','logout'].forEach(k=>{
+    document.getElementById('anav-'+k)?.classList.toggle('active',k===nav);
   });
-  const tabMap = { home:'overview', members:'members', payments:'payments' };
+  const tabMap = {home:'overview',members:'members',payments:'payments'};
   if (tabMap[nav]) switchAdminTab(tabMap[nav]);
 }
 
@@ -1079,85 +2135,88 @@ function switchAdminNav(nav) {
 function setupRecordPayment(preselect) {
   const sel = document.getElementById('rp-member');
   sel.innerHTML = '<option value="">-- Choose a Member --</option>';
-  store.members.forEach(m => {
+  store.members.forEach(m=>{
     const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.textContent = `${m.name} · ${m.phone}`;
-    if (preselect && m.id === preselect) opt.selected = true;
+    opt.value=m.id; opt.textContent=`${m.name} · ${m.phone}`;
+    if (preselect&&m.id===preselect) opt.selected=true;
     sel.appendChild(opt);
   });
-  document.getElementById('rp-from').value = today();
-  document.getElementById('rp-to').value = '';
-  document.getElementById('rp-plan').value = '';
-  document.getElementById('rp-amount').value = '';
-  document.getElementById('rp-notes').value = '';
+  document.getElementById('rp-from').value=today();
+  ['rp-to','rp-plan','rp-amount','rp-notes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
 }
 
-function recordPaymentFor(memberId) {
-  showView('v-record-payment');
-  setupRecordPayment(memberId);
-}
+function recordPaymentFor(memberId) { showView('v-record-payment'); setupRecordPayment(memberId); }
 
 function recordPayment() {
   const memberId = document.getElementById('rp-member').value;
   const fromDate = document.getElementById('rp-from').value;
-  const toDate = document.getElementById('rp-to').value;
-  const plan = document.getElementById('rp-plan').value.trim();
-  const amount = document.getElementById('rp-amount').value;
-  const notes = document.getElementById('rp-notes').value.trim();
+  const toDate   = document.getElementById('rp-to').value;
+  const plan     = document.getElementById('rp-plan').value.trim();
+  const amount   = document.getElementById('rp-amount').value;
+  const notes    = document.getElementById('rp-notes').value.trim();
 
-  if (!memberId) { toast('Select a member first!', 'error'); return; }
-  if (!fromDate || !toDate) { toast('Set both From and To dates!', 'error'); return; }
-  if (new Date(toDate) < new Date(fromDate)) { toast('To date must be after From date!', 'error'); return; }
-  if (!plan) { toast('Enter plan/package name!', 'error'); return; }
-  if (!amount || amount <= 0) { toast('Enter a valid amount!', 'error'); return; }
+  if (!memberId) { toast('Select a member first!','error'); return; }
+  if (!fromDate||!toDate) { toast('Set both From and To dates!','error'); return; }
+  if (new Date(toDate)<new Date(fromDate)) { toast('To date must be after From date!','error'); return; }
+  if (!plan) { toast('Enter plan/package name!','error'); return; }
+  if (!amount||amount<=0) { toast('Enter a valid amount!','error'); return; }
 
-  const member = getMemberById(memberId);
-  const payment = {
-    id: 'PAY' + String(store.payments.length + 1).padStart(3,'0'),
-    memberId, memberName: member.name, phone: member.phone,
-    fromDate, toDate, amount: Number(amount), paidDate: today(),
-    status: 'paid', plan, notes
-  };
-  store.payments.push(payment);
-  store.lastPayment = payment;
-  store.invoiceReturn = 'v-admin-dash';
-  toast('Payment recorded! 🎉', 'success');
-  viewInvoice(payment.id, 'admin');
+  // Button loading state
+  const btn = document.getElementById('pay-btn');
+  btn.innerHTML = '<svg class="dumbbell-spinner" width="20" height="20" viewBox="0 0 64 64"><rect x="4" y="22" width="11" height="20" rx="4" fill="#fff"/><rect x="49" y="22" width="11" height="20" rx="4" fill="#fff"/><rect x="13" y="18" width="8" height="28" rx="3" fill="rgba(255,255,255,.5)"/><rect x="43" y="18" width="8" height="28" rx="3" fill="rgba(255,255,255,.5)"/><rect x="21" y="27" width="22" height="10" rx="5" fill="rgba(255,255,255,.3)"/></svg> Processing...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    const member = getMemberById(memberId);
+    const payment = {
+      id: 'PAY' + String(store.payments.length+1).padStart(3,'0'),
+      memberId, memberName:member.name, phone:member.phone,
+      fromDate, toDate, amount:Number(amount), paidDate:today(),
+      status:'paid', plan, notes
+    };
+    store.payments.push(payment);
+    store.lastPayment = payment;
+    store.invoiceReturn = 'v-admin-dash';
+
+    btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm & Generate Invoice';
+    btn.disabled = false;
+
+    const cx = window.innerWidth/2; const cy = window.innerHeight/2;
+    spawnConfetti(cx, cy);
+    floatScore(payment.amount, cx, cy);
+    toast('Payment recorded! 🎉', 'success');
+    viewInvoice(payment.id, 'admin');
+  }, 900);
 }
 
 // ─── ADD MEMBER ───────────────────────────────────────────────
 function clearAddMemberForm() {
-  ['am-name','am-phone','am-email','am-pass'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
+  ['am-name','am-phone','am-email','am-pass'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
   });
 }
 
 function addMember() {
-  const name = document.getElementById('am-name').value.trim();
-  const phone = document.getElementById('am-phone').value.trim();
-  const email = document.getElementById('am-email').value.trim();
-  const membership = document.getElementById('am-membership').value;
-  const joinDate = document.getElementById('am-join-date').value || today();
-  const pass = document.getElementById('am-pass').value.trim();
-
-  if (!name || !phone || !email || !pass) { toast('Fill all required fields!', 'error'); return; }
-  if (phone.length < 10) { toast('Enter valid 10-digit phone!', 'error'); return; }
-  if (store.members.find(m => m.phone === phone)) { toast('Phone already exists!', 'error'); return; }
-
-  store.members.push({ id: genId('m'), name, phone, email, membershipType: membership, joinDate, password: pass });
+  const name=document.getElementById('am-name').value.trim();
+  const phone=document.getElementById('am-phone').value.trim();
+  const email=document.getElementById('am-email').value.trim();
+  const membership=document.getElementById('am-membership').value;
+  const joinDate=document.getElementById('am-join-date').value||today();
+  const pass=document.getElementById('am-pass').value.trim();
+  if (!name||!phone||!email||!pass) { toast('Fill all required fields!','error'); return; }
+  if (phone.length<10) { toast('Enter valid 10-digit phone!','error'); return; }
+  if (store.members.find(m=>m.phone===phone)) { toast('Phone already exists!','error'); return; }
+  store.members.push({ id:genId('m'), name, phone, email, membershipType:membership, joinDate, password:pass });
   toast(`${name} added successfully! ✅`, 'success');
   showView('v-admin-dash');
 }
 
 function deleteMember(id) {
   if (!confirm('Delete this member? All their payment records will be removed.')) return;
-  store.members = store.members.filter(m => m.id !== id);
-  store.payments = store.payments.filter(p => p.memberId !== id);
-  toast('Member deleted.', '');
-  renderMembersList();
-  renderAdminDash();
+  store.members=store.members.filter(m=>m.id!==id);
+  store.payments=store.payments.filter(p=>p.memberId!==id);
+  toast('Member deleted.','');
+  renderMembersList(); renderAdminDash();
 }
 
 // ─── MEMBER DASHBOARD ─────────────────────────────────────────
@@ -1167,207 +2226,278 @@ function renderMemberDash() {
   document.getElementById('member-greet-time').textContent = getGreeting();
   document.getElementById('member-dash-name').textContent = m.name.toUpperCase();
 
-  // Membership status card
   const s = getMembershipStatus(m.id);
   const latest = getLatestPaidPayment(m.id);
-  const statusColors = { active:'#16a34a', expiring:'#d97706', expired:'#dc2626', inactive:'#888' };
+
+  // Status badge color
+  const badgeColors = {
+    active: { bg:'rgba(57,255,20,.12)', color:'#39ff14', border:'rgba(57,255,20,.3)' },
+    expiring: { bg:'rgba(245,158,11,.12)', color:'#f59e0b', border:'rgba(245,158,11,.3)' },
+    expired: { bg:'rgba(239,68,68,.12)', color:'#ef4444', border:'rgba(239,68,68,.3)' },
+    inactive: { bg:'rgba(255,255,255,.05)', color:'rgba(255,255,255,.4)', border:'rgba(255,255,255,.1)' },
+  };
+  const bc = badgeColors[s.status]||badgeColors.inactive;
+
   document.getElementById('mem-status-card').innerHTML = `
-    <div class="membership-card-label">${m.membershipType} Plan</div>
-    ${latest ? `
-      <div class="membership-card-dates">${fmtDate(latest.fromDate)} — ${fmtDate(latest.toDate)}</div>
-      <div class="membership-card-status">
-        <span class="badge" style="background:rgba(255,255,255,.15);color:#fff;font-size:12px;">
-          ${s.label}
-        </span>
-      </div>
-    ` : `<div class="membership-card-dates">No active plan</div>`}
-    <div style="margin-top:14px;font-size:12px;color:rgba(255,255,255,.55);">Member since ${fmtDate(m.joinDate)}</div>
+    <div class="mc-plan-label">${m.membershipType} Plan</div>
+    <div class="mc-member-name">${m.name.toUpperCase()}</div>
+    ${latest ? `<div class="mc-dates">${fmtDate(latest.fromDate)} — ${fmtDate(latest.toDate)}</div>` : '<div class="mc-dates">No active plan</div>'}
+    <div class="mc-status-row">
+      <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;background:${bc.bg};color:${bc.color};border:1px solid ${bc.border};${s.status==='active'?'box-shadow:0 0 10px '+bc.border+';':''}">
+        ${s.status==='active'?'<span style="width:6px;height:6px;border-radius:50%;background:'+bc.color+';display:inline-block;animation:pulse 1.5s ease-in-out infinite;box-shadow:0 0 6px '+bc.color+';"></span>':''} ${s.label}
+      </span>
+      <span style="font-size:10px;color:rgba(255,255,255,.25);font-family:Rajdhani;">TAP TO FLIP</span>
+    </div>
+    <div style="margin-top:12px;font-size:10px;color:rgba(255,255,255,.3);font-family:'Rajdhani',sans-serif;letter-spacing:.5px;">MEMBER SINCE ${fmtDate(m.joinDate)}</div>
   `;
+
+  // Back of card
+  const allPay = getMemberPayments(m.id).slice(0,3);
+  document.getElementById('mc-back-history').innerHTML = allPay.length===0
+    ? '<div style="color:rgba(255,255,255,.3);">No payments yet</div>'
+    : allPay.map(p=>`
+      <div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:rgba(255,255,255,.6);font-family:'Rajdhani',sans-serif;">${p.plan}</span>
+        <span style="font-weight:700;color:${p.status==='paid'?'var(--neon)':'var(--warning)'};font-family:'Rajdhani',sans-serif;">${fmtINR(p.amount)}</span>
+      </div>`).join('');
 
   // Pending notice
   const pending = getPendingPayments(m.id);
-  const pendingNotice = document.getElementById('mem-pending-notice');
-  if (pending.length > 0) {
-    const totalPending = pending.reduce((s,p)=>s+p.amount,0);
-    document.getElementById('mem-pending-amount').textContent = fmtINR(totalPending);
+  const pn = document.getElementById('mem-pending-notice');
+  if (pending.length>0) {
+    const tot = pending.reduce((s,p)=>s+p.amount,0);
+    document.getElementById('mem-pending-amount').textContent = fmtINR(tot);
     document.getElementById('mem-pending-for').textContent = `${pending.length} pending payment${pending.length>1?'s':''}`;
-    pendingNotice.style.display = '';
-  } else {
-    pendingNotice.style.display = 'none';
-  }
+    pn.style.display='';
+  } else { pn.style.display='none'; }
 
   // Stats
-  const allPay = getMemberPayments(m.id);
-  const totalPaid = allPay.filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0);
-  const pendingAmt = allPay.filter(p=>p.status==='pending').reduce((s,p)=>s+p.amount,0);
+  const paidTotal = getMemberPayments(m.id).filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0);
+  const pendAmt = getMemberPayments(m.id).filter(p=>p.status==='pending').reduce((s,p)=>s+p.amount,0);
   document.getElementById('member-stat-grid').innerHTML = `
-    <div class="stat-card sc-black">
-      <div class="stat-icon">💵</div>
-      <div class="stat-val" style="font-size:22px;">${fmtINR(totalPaid)}</div>
-      <div class="stat-lbl">TOTAL PAID</div>
+    <div class="stat-card sc-blue stagger-child" style="animation-delay:.05s">
+      <div class="card-shine"></div>
+      <div class="stat-icon" style="color:var(--blue);">💵</div>
+      <div class="stat-val" style="font-size:22px;color:var(--blue);" data-count="${paidTotal}" data-fmt="inr">₹0</div>
+      <div class="stat-lbl" style="color:rgba(0,212,255,.6);">TOTAL PAID</div>
     </div>
-    <div class="stat-card sc-orange">
+    <div class="stat-card sc-gold stagger-child" style="animation-delay:.12s">
+      <div class="card-shine"></div>
       <div class="stat-icon">⏳</div>
-      <div class="stat-val" style="font-size:22px;">${fmtINR(pendingAmt)}</div>
-      <div class="stat-lbl">PENDING</div>
+      <div class="stat-val" style="font-size:22px;" data-count="${pendAmt}" data-fmt="inr">₹0</div>
+      <div class="stat-lbl" style="color:rgba(255,215,0,.6);">PENDING</div>
     </div>
   `;
+  setTimeout(runCounters, 120);
 
-  // Payment history
-  const history = [...allPay].sort((a,b)=>new Date(b.fromDate)-new Date(a.fromDate));
-  const histEl = document.getElementById('member-payment-history');
-  if (history.length === 0) {
-    histEl.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>No payment records yet</p></div>`;
-  } else {
-    histEl.innerHTML = history.map(p => payRowHTML(p, false)).join('');
+  // Timeline bar
+  if (latest) {
+    const start = new Date(latest.fromDate+'T00:00:00');
+    const end = new Date(latest.toDate+'T00:00:00');
+    const now = new Date(); now.setHours(0,0,0,0);
+    const total = end - start;
+    const elapsed = Math.min(Math.max(now - start, 0), total);
+    const pct = Math.round((elapsed/total)*100);
+    setTimeout(()=>{
+      const tf = document.getElementById('timeline-fill');
+      if (tf) tf.style.width = pct + '%';
+      const tl = document.getElementById('timeline-labels');
+      if (tl) tl.innerHTML = `<span>${fmtDate(latest.fromDate)}</span><span style="color:${pct>85?'var(--warning)':'rgba(255,255,255,.3)'};">${fmtDate(latest.toDate)}</span>`;
+    }, 300);
   }
-}
 
-function showInvoiceFromMember() {
-  const m = store.currentUser;
-  const latest = getMemberPayments(m.id).filter(p=>p.status==='paid').sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate))[0];
-  if (!latest) { toast('No paid invoices yet!', 'error'); return; }
-  store.invoiceReturn = 'v-member-dash';
-  viewInvoice(latest.id, 'member');
+  // History
+  const history = [...getMemberPayments(m.id)].sort((a,b)=>new Date(b.fromDate)-new Date(a.fromDate));
+  const histEl = document.getElementById('member-payment-history');
+  histEl.innerHTML = history.length===0
+    ? `<div class="empty-state"><i class="fas fa-receipt"></i><p>No payment records yet</p></div>`
+    : history.map(p=>payRowHTML(p, false)).join('');
+
+  setTimeout(()=>{ initTilt('.stat-card'); initCardParallax(); }, 200);
 }
 
 // ─── INVOICE ──────────────────────────────────────────────────
 function viewInvoice(payId, role) {
-  const p = store.payments.find(x => x.id === payId);
-  if (!p) { toast('Invoice not found!', 'error'); return; }
+  const p = store.payments.find(x=>x.id===payId);
+  if (!p) { toast('Invoice not found!','error'); return; }
   store.lastPayment = p;
-  if (role) store.invoiceReturn = role === 'admin' ? 'v-admin-dash' : 'v-member-dash';
+  if (role) store.invoiceReturn = role==='admin'?'v-admin-dash':'v-member-dash';
 
   const member = getMemberById(p.memberId);
-  const statusBadge = p.status === 'paid'
-    ? `<span style="color:var(--success);font-weight:700;">✓ PAID</span>`
+  const statusBadge = p.status==='paid'
+    ? `<span style="color:var(--neon);font-weight:700;text-shadow:0 0 10px var(--neon);">✓ PAID</span>`
     : `<span style="color:var(--warning);font-weight:700;">⏳ PENDING</span>`;
 
   document.getElementById('invoice-content').innerHTML = `
     <div class="invoice-header">
       <div class="invoice-logo">🏋️ THE FITNESS PLANET GYM</div>
       <div class="invoice-sub">Your Fitness, Our Commitment</div>
-      <div style="margin-top:6px;font-size:11px;color:var(--gray-500);">
-        📞 +91 63904 62629 &nbsp;·&nbsp; Managed by Rohit Jaiswal
-      </div>
-      <div style="margin-top:8px;font-size:11px;color:var(--gray-500);">Invoice No: <b>${p.id}</b></div>
-      <div style="font-size:11px;color:var(--gray-500);">Date: ${fmtDate(p.paidDate || today())}</div>
+      <div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,.3);">📞 +91 63904 62629 &nbsp;·&nbsp; Managed by Rohit Jaiswal</div>
+      <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.3);">Invoice No: <b style="color:var(--blue);">${p.id}</b></div>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);">Date: ${fmtDate(p.paidDate||today())}</div>
     </div>
-
-    <div style="font-size:12px;font-weight:700;color:var(--gray-500);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.5px;">Member Information</div>
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.3);margin:14px 0 8px;text-transform:uppercase;letter-spacing:1px;font-family:'Rajdhani',sans-serif;">Member Information</div>
     <div class="invoice-row"><span class="lbl">Name</span><span class="val">${p.memberName}</span></div>
     <div class="invoice-row"><span class="lbl">Phone</span><span class="val">${p.phone}</span></div>
-    ${member ? `<div class="invoice-row"><span class="lbl">Email</span><span class="val">${member.email}</span></div>` : ''}
-    <div class="invoice-row"><span class="lbl">Member ID</span><span class="val">${p.memberId}</span></div>
-
-    <div style="font-size:12px;font-weight:700;color:var(--gray-500);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;">Payment Details</div>
+    ${member?`<div class="invoice-row"><span class="lbl">Email</span><span class="val">${member.email}</span></div>`:''}
+    <div class="invoice-row"><span class="lbl">Member ID</span><span class="val" style="color:var(--blue);">${p.memberId}</span></div>
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.3);margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px;font-family:'Rajdhani',sans-serif;">Payment Details</div>
     <div class="invoice-row"><span class="lbl">Plan</span><span class="val">${p.plan}</span></div>
     <div class="invoice-row"><span class="lbl">From</span><span class="val">${fmtDate(p.fromDate)}</span></div>
     <div class="invoice-row"><span class="lbl">To</span><span class="val">${fmtDate(p.toDate)}</span></div>
     <div class="invoice-row"><span class="lbl">Status</span><span class="val">${statusBadge}</span></div>
-    ${p.notes ? `<div class="invoice-row"><span class="lbl">Notes</span><span class="val">${p.notes}</span></div>` : ''}
-
+    ${p.notes?`<div class="invoice-row"><span class="lbl">Notes</span><span class="val">${p.notes}</span></div>`:''}
     <div class="invoice-total">
       <span class="lbl">Amount Paid</span>
       <span class="val">${fmtINR(p.amount)}</span>
     </div>
-
-    <div style="text-align:center;margin-top:18px;font-size:11px;color:var(--gray-500);line-height:1.9;">
-      💪 Keep pushing! Thank you for being part of<br><b>The Fitness Planet GYM Family</b><br>
+    <div style="text-align:center;margin-top:18px;font-size:11px;color:rgba(255,255,255,.3);line-height:2;">
+      💪 Keep pushing! Thank you for being part of<br>
+      <b style="color:rgba(255,255,255,.6);">The Fitness Planet GYM Family</b><br>
       <span style="color:var(--accent);font-weight:700;">📞 +91 63904 62629</span>
     </div>
   `;
-
   showView('v-invoice');
 }
 
-function goBackFromInvoice() {
-  showView(store.invoiceReturn || 'v-landing');
-}
+function goBackFromInvoice() { showView(store.invoiceReturn||'v-landing'); }
 
 // ─── WHATSAPP ──────────────────────────────────────────────────
 function sendWhatsApp() {
   const p = store.lastPayment;
-  if (!p) { toast('No invoice data!', 'error'); return; }
+  if (!p) { toast('No invoice data!','error'); return; }
   const member = getMemberById(p.memberId);
-
-  const text = `🏋️ *THE FITNESS PLANET GYM*
-━━━━━━━━━━━━━━━━━━━━━━
-
-🌟 Hello *${p.memberName}*! 
-
-Your payment has been successfully recorded. Here are your complete details:
-
-📋 *INVOICE DETAILS*
-━━━━━━━━━━━━━━━━━━━━━━
-🔖 Invoice No: *${p.id}*
-📅 Date: *${fmtDate(p.paidDate || today())}*
-
-👤 *MEMBER INFORMATION*
-• Name: *${p.memberName}*
-• Phone: ${p.phone}
-${member ? `• Email: ${member.email}` : ''}
-• Member ID: \`${p.memberId}\`
-
-💳 *PAYMENT DETAILS*
-• Plan: *${p.plan}*
-• Period: ${fmtDate(p.fromDate)} → ${fmtDate(p.toDate)}
-• Amount Paid: *${fmtINR(p.amount)}*
-• Status: ✅ *PAID*
-${p.notes ? `• Notes: _${p.notes}_` : ''}
-
-━━━━━━━━━━━━━━━━━━━━━━
-💪 Keep pushing your limits! We're proud to have *${p.memberName.split(' ')[0]}* as part of *The Fitness Planet Family*.
-
-See you at the gym! 🔥
-
-━━━━━━━━━━━━━━━━━━━━━━
-*The Fitness Planet GYM*
-_Your Fitness, Our Commitment_
-📞 *+91 63904 62629* (Rohit Jaiswal)`;
-
-  // Send to member's phone number
-  const memberPhone = '91' + p.phone.replace(/\D/g,'');
-  const encoded = encodeURIComponent(text);
-  window.open(`https://wa.me/${memberPhone}?text=${encoded}`, '_blank');
+  const text = `🏋️ *THE FITNESS PLANET GYM*\n━━━━━━━━━━━━━━━━━━━━━━\n\n🌟 Hello *${p.memberName}*!\n\nYour payment has been successfully recorded.\n\n📋 *INVOICE DETAILS*\n━━━━━━━━━━━━━━━━━━━━━━\n🔖 Invoice No: *${p.id}*\n📅 Date: *${fmtDate(p.paidDate||today())}*\n\n👤 *MEMBER INFORMATION*\n• Name: *${p.memberName}*\n• Phone: ${p.phone}\n${member?`• Email: ${member.email}`:''}\n• Member ID: \`${p.memberId}\`\n\n💳 *PAYMENT DETAILS*\n• Plan: *${p.plan}*\n• Period: ${fmtDate(p.fromDate)} → ${fmtDate(p.toDate)}\n• Amount Paid: *${fmtINR(p.amount)}*\n• Status: ✅ *PAID*\n${p.notes?`• Notes: _${p.notes}_`:''}\n\n━━━━━━━━━━━━━━━━━━━━━━\n💪 Keep pushing your limits!\n\n*The Fitness Planet GYM*\n_Your Fitness, Our Commitment_\n📞 *+91 63904 62629*`;
+  const phone = '91' + p.phone.replace(/\D/g,'');
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
   toast('Opening WhatsApp to send invoice 📲', 'success');
+}
+
+function showInvoiceFromMember() {
+  const m = store.currentUser;
+  const latest = getMemberPayments(m.id).filter(p=>p.status==='paid').sort((a,b)=>new Date(b.paidDate)-new Date(a.paidDate))[0];
+  if (!latest) { toast('No paid invoices yet!','error'); return; }
+  store.invoiceReturn='v-member-dash';
+  viewInvoice(latest.id, 'member');
 }
 
 // ─── SOCIAL ANIMATION ─────────────────────────────────────────
 function triggerSocialAnimation() {
   const btns = document.querySelectorAll('.social-btn');
-  btns.forEach((btn, i) => {
-    setTimeout(() => {
+  btns.forEach((btn,i) => {
+    setTimeout(()=>{
       btn.classList.remove('split-animate');
-      void btn.offsetWidth; // reflow
+      void btn.offsetWidth;
       btn.classList.add('split-animate');
-      setTimeout(() => btn.classList.remove('split-animate'), 700);
-    }, i * 150);
+      setTimeout(()=>btn.classList.remove('split-animate'), 700);
+    }, i*150);
   });
 }
 
-// Observe social strip with scroll
 const socialStrip = document.getElementById('social-strip');
 if (socialStrip && 'IntersectionObserver' in window) {
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) triggerSocialAnimation();
-    });
-  }, { threshold: 0.5 });
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting) triggerSocialAnimation(); });
+  }, { threshold:.5 });
   obs.observe(socialStrip);
 }
 
-// Also trigger on load
-window.addEventListener('load', () => {
-  setTimeout(triggerSocialAnimation, 800);
-});
+// ─── PARTICLES (Gym silhouettes) ───────────────────────────────
+(function() {
+  const canvas = document.getElementById('particle-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width = Math.min(window.innerWidth, 480);
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Draw a tiny dumbbell shape
+  function drawDumbbell(ctx, x, y, size, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = size * 0.12;
+    ctx.lineCap = 'round';
+    // bar
+    ctx.beginPath();
+    ctx.moveTo(x - size*0.6, y);
+    ctx.lineTo(x + size*0.6, y);
+    ctx.stroke();
+    // left weight
+    ctx.fillStyle = '#00d4ff';
+    ctx.fillRect(x-size*.7, y-size*.25, size*.12, size*.5);
+    // right weight
+    ctx.fillRect(x+size*.58, y-size*.25, size*.12, size*.5);
+    ctx.restore();
+  }
+
+  function drawLightning(ctx, x, y, size, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#39ff14';
+    ctx.lineWidth = size*.08;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x+size*.1, y-size*.5);
+    ctx.lineTo(x-size*.1, y);
+    ctx.lineTo(x+size*.05, y);
+    ctx.lineTo(x-size*.1, y+size*.5);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  const drawFns = [drawDumbbell, drawLightning, drawDumbbell];
+
+  function createParticle() {
+    return {
+      x: Math.random()*W, y: H+20,
+      size: 10 + Math.random()*16,
+      speed: 0.25 + Math.random()*.5,
+      opacity: 0.04 + Math.random()*.08,
+      type: Math.floor(Math.random()*drawFns.length),
+      drift: (Math.random()-.5)*.25,
+      rot: Math.random()*Math.PI*2,
+      rotSpeed: (Math.random()-.5)*.02
+    };
+  }
+
+  for (let i=0; i<14; i++) {
+    const p = createParticle();
+    p.y = Math.random()*H;
+    particles.push(p);
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    particles.forEach((p,i) => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      drawFns[p.type](ctx, 0, 0, p.size, p.opacity);
+      ctx.restore();
+      p.y -= p.speed;
+      p.x += p.drift;
+      p.rot += p.rotSpeed;
+      if (p.y < -40) particles[i] = createParticle();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
 
 // ─── INIT ──────────────────────────────────────────────────────
-// Set today as default in add member form
-document.addEventListener('DOMContentLoaded', () => {
-  const joinDateEl = document.getElementById('am-join-date');
-  if (joinDateEl) joinDateEl.value = today();
+document.addEventListener('DOMContentLoaded', ()=>{
+  const jd = document.getElementById('am-join-date');
+  if (jd) jd.value = today();
+  setTimeout(triggerSocialAnimation, 900);
+  setTimeout(()=>initTilt('.stat-card'), 500);
 });
 </script>
 </body>
 </html>
+
